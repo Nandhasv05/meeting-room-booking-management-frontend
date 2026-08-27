@@ -102,15 +102,26 @@ const schema = Yup.object({
   return startAt.getTime() >= Date.now() - 60_000;
 });
 
+const MAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
+const MAIL_EXACT = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+
+function cleanMailText(value: string): string {
+  return value
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
+    .replace(/\uFF20/g, '@')
+    .trim();
+}
+
+/** Pull real addresses out of a paste (commas, names, <brackets>, hidden characters). */
 function parseEmails(raw: string): string[] {
-  return [
-    ...new Set(
-      raw
-        .split(/[,;\n]+/)
-        .map((e) => e.trim().toLowerCase())
-        .filter((e) => e.length > 0),
-    ),
-  ];
+  const cleaned = cleanMailText(raw).toLowerCase();
+  const found = cleaned.match(MAIL_RE) ?? [];
+  return [...new Set(found)];
+}
+
+function isMailId(value: string): boolean {
+  return MAIL_EXACT.test(cleanMailText(value).toLowerCase());
 }
 
 function slotIso(date: string, time: string): string | undefined {
@@ -186,14 +197,15 @@ export function BookingFormPage() {
         }}
         validationSchema={schema}
         onSubmit={(v) => {
-          const invites = [
-            ...new Set([...v.employees.map((e) => e.email.toLowerCase()), ...parseEmails(v.extraEmails)]),
-          ];
+          const fromPeople = v.employees
+            .map((e) => cleanMailText(e.email).toLowerCase())
+            .filter(Boolean);
+          const invites = [...new Set([...fromPeople, ...parseEmails(v.extraEmails)])];
           if (invites.length === 0) {
             toast.error('Add at least one employee or invitation mail ID.');
             return;
           }
-          const bad = invites.find((e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+          const bad = invites.find((e) => !isMailId(e));
           if (bad) {
             toast.error(`Invalid invitation mail ID: ${bad}`);
             return;
@@ -506,7 +518,10 @@ function InvitePreview({
   organizer: string;
 }) {
   const guests = [
-    ...new Set([...employees.map((e) => e.email.toLowerCase()), ...parseEmails(extraEmails)]),
+    ...new Set([
+      ...employees.map((e) => cleanMailText(e.email).toLowerCase()).filter(Boolean),
+      ...parseEmails(extraEmails),
+    ]),
   ];
   const org = organizer.trim().toLowerCase();
   if (!guests.length) {
