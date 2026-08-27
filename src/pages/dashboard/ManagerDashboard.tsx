@@ -18,11 +18,6 @@ export function ManagerDashboard({ data }: { data: Dash }) {
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      <WelcomeBand
-        kicker="Hall manager"
-        subtitle={`${occupiedNow} room${occupiedNow === 1 ? '' : 's'} in use · ${s.AvailableHalls ?? 0} free · ${s.TodayBookings ?? 0} on today’s board`}
-      />
-
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 stagger">
         <PulseStat icon={DoorOpen} label="Halls" value={s.TotalHalls} />
         <PulseStat icon={DoorOpen} label="Free" value={s.AvailableHalls} accent />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { api, unwrap } from '../services/api';
+import { useAppDispatch, useAppSelector } from '../store';
+import { checkAvailabilityStart } from '../redux/availability/availability.action';
+import { selectAvailability, selectAvailabilityLoading } from '../redux/availability/availability.selector';
 
 export type SlotConflict = {
   Id: string;
@@ -56,29 +57,34 @@ export function useAvailability(input: {
   attendeeCount?: number;
   excludeBookingId?: string;
 }) {
+  const dispatch = useAppDispatch();
+  const data = useAppSelector(selectAvailability) as AvailabilityResult | null;
+  const isFetching = useAppSelector(selectAvailabilityLoading);
   const enabled = Boolean(input.startAt && input.endAt && (input.hallId || input.userIds.length));
-  return useQuery({
-    queryKey: [
-      'availability',
-      input.hallId ?? '',
-      [...input.userIds].sort().join(','),
-      input.startAt ?? '',
-      input.endAt ?? '',
-      input.attendeeCount ?? 0,
-    ],
-    queryFn: () =>
-      unwrap<AvailabilityResult>(
-        api.post('/availability/check', {
-          hallId: input.hallId || undefined,
-          userIds: input.userIds.length ? input.userIds : undefined,
-          startAt: input.startAt,
-          endAt: input.endAt,
-          attendeeCount: input.attendeeCount,
-          excludeBookingId: input.excludeBookingId,
-        }),
-      ),
+  const key = JSON.stringify({
+    hallId: input.hallId ?? '',
+    userIds: [...input.userIds].sort(),
+    startAt: input.startAt ?? '',
+    endAt: input.endAt ?? '',
+    attendeeCount: input.attendeeCount ?? 0,
+    excludeBookingId: input.excludeBookingId ?? '',
     enabled,
-    placeholderData: keepPreviousData,
-    staleTime: 10_000,
   });
+
+  useEffect(() => {
+    if (!enabled) return;
+    dispatch(
+      checkAvailabilityStart({
+        hallId: input.hallId || undefined,
+        userIds: input.userIds.length ? input.userIds : undefined,
+        startAt: input.startAt,
+        endAt: input.endAt,
+        attendeeCount: input.attendeeCount,
+        excludeBookingId: input.excludeBookingId,
+      }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, dispatch, enabled]);
+
+  return { data, isFetching };
 }

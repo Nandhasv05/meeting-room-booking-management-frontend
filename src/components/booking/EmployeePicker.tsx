@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { Search, UserPlus, X } from 'lucide-react';
-import { api, unwrap } from '../../services/api';
 import { useDebounced } from '../../hooks/useAvailability';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { searchUsersStart } from '../../redux/users/users.action';
+import { selectSearchLoading, selectSearchResults } from '../../redux/users/users.selector';
 
 export type Employee = {
   Id: string;
@@ -42,13 +43,13 @@ export function EmployeePicker({
   const [open, setOpen] = useState(false);
   const q = useDebounced(term, 300);
   const inline = variant === 'inline';
+  const dispatch = useAppDispatch();
+  const data = useAppSelector(selectSearchResults) as Employee[] | undefined;
+  const isFetching = useAppSelector(selectSearchLoading);
 
-  const { data, isFetching } = useQuery({
-    queryKey: ['employee-search', q],
-    queryFn: () => unwrap<Employee[]>(api.get('/users/search', { params: { q } })),
-    enabled: q.trim().length >= 2,
-    staleTime: 30_000,
-  });
+  useEffect(() => {
+    if (q.trim().length >= 2) dispatch(searchUsersStart({ q }));
+  }, [q, dispatch]);
 
   const results = (data ?? []).filter((e) => !selected.some((s) => s.id === e.Id));
 

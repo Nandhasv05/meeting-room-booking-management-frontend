@@ -1,28 +1,28 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
 import { GuestLayout } from '../layouts/GuestLayout';
-import { LoginPage } from '../pages/LoginPage';
-import { DashboardPage } from '../pages/DashboardPage';
-import { HallsPage } from '../pages/HallsPage';
-import { HallFormPage } from '../pages/HallFormPage';
-import { HallDetailPage } from '../pages/HallDetailPage';
-import { BookingFormPage } from '../pages/BookingFormPage';
-import { MyBookingsPage } from '../pages/MyBookingsPage';
-import { BookingDetailPage } from '../pages/BookingDetailPage';
-import { CalendarPage } from '../pages/CalendarPage';
-import { EventsPage } from '../pages/EventsPage';
-import { EventDetailPage } from '../pages/EventDetailPage';
-import { DisplayPage } from '../pages/DisplayPage';
-import { DisplaysIndexPage } from '../pages/DisplaysIndexPage';
-import { ReportsPage } from '../pages/ReportsPage';
-import { UsersPage } from '../pages/UsersPage';
-import { RolesPage } from '../pages/RolesPage';
-import { DepartmentsPage } from '../pages/DepartmentsPage';
-import { SettingsPage } from '../pages/SettingsPage';
-import { AuditPage } from '../pages/AuditPage';
-import { MaintenancePage } from '../pages/MaintenancePage';
-import { FacilitiesPage } from '../pages/FacilitiesPage';
-import { NotificationsPage } from '../pages/NotificationsPage';
+import { LoginPage } from '../pages/login/LoginPage';
+import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { HallsPage } from '../pages/hall/HallsPage';
+import { HallFormPage } from '../pages/hall/HallFormPage';
+import { HallDetailPage } from '../pages/hall/HallDetailPage';
+import { BookingFormPage } from '../pages/booking/BookingFormPage';
+import { MyBookingsPage } from '../pages/booking/MyBookingsPage';
+import { BookingDetailPage } from '../pages/booking/BookingDetailPage';
+import { CalendarPage } from '../pages/calendar/CalendarPage';
+import { EventsPage } from '../pages/event/EventsPage';
+import { EventDetailPage } from '../pages/event/EventDetailPage';
+import { DisplayPage } from '../pages/display/DisplayPage';
+import { DisplaysIndexPage } from '../pages/display/DisplaysIndexPage';
+import { ReportsPage } from '../pages/reports/ReportsPage';
+import { UsersPage } from '../pages/setting/UsersPage';
+import { RolesPage } from '../pages/role/RolesPage';
+import { DepartmentsPage } from '../pages/department/DepartmentsPage';
+import { SettingsPage } from '../pages/setting/SettingsPage';
+import { AuditPage } from '../pages/audit/AuditPage';
+import { MaintenancePage } from '../pages/setting/MaintenancePage';
+import { FacilitiesPage } from '../pages/hall/FacilitiesPage';
+import { NotificationsPage } from '../pages/setting/NotificationsPage';
 import { isOpsDashboardRole } from '../utils/roles';
 import { useAppSelector } from '../store';
 
@@ -41,27 +41,27 @@ export function AppRoutes() {
       <Route path="/display/:hallCode" element={<DisplayPage />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomeRedirect />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/halls" element={<HallsPage />} />
-        <Route path="/halls/facilities" element={<FacilitiesPage />} />
-        <Route path="/halls/new" element={<HallFormPage />} />
-        <Route path="/halls/:id" element={<HallDetailPage />} />
-        <Route path="/halls/:id/edit" element={<HallFormPage />} />
-        <Route path="/bookings/new" element={<BookingFormPage />} />
-        <Route path="/bookings" element={<MyBookingsPage />} />
-        <Route path="/bookings/:id" element={<BookingDetailPage />} />
-        <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/displays" element={<DisplaysIndexPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/admin/users" element={<UsersPage />} />
-        <Route path="/admin/roles" element={<RolesPage />} />
-        <Route path="/admin/departments" element={<DepartmentsPage />} />
-        <Route path="/admin/settings" element={<SettingsPage />} />
-        <Route path="/admin/audit" element={<AuditPage />} />
-        <Route path="/admin/maintenance" element={<MaintenancePage />} />
+        <Route path="/Dashboard" element={<DashboardPage />} />
+        <Route path="/Halls" element={<HallsPage />} />
+        <Route path="/Halls/Facilities" element={<FacilitiesPage />} />
+        <Route path="/Halls/New" element={<HallFormPage />} />
+        <Route path="/Halls/:id" element={<HallDetailPage />} />
+        <Route path="/Halls/:id/Edit" element={<HallFormPage />} />
+        <Route path="/Bookings/New" element={<BookingFormPage />} />
+        <Route path="/Bookings" element={<MyBookingsPage />} />
+        <Route path="/Bookings/:id" element={<BookingDetailPage />} />
+        <Route path="/Calendar" element={<CalendarPage />} />
+        <Route path="/Events" element={<EventsPage />} />
+        <Route path="/Events/:id" element={<EventDetailPage />} />
+        <Route path="/Displays" element={<DisplaysIndexPage />} />
+        <Route path="/Reports" element={<ReportsPage />} />
+        <Route path="/Notifications" element={<NotificationsPage />} />
+        <Route path="/Admin/users" element={<UsersPage />} />
+        <Route path="/Admin/roles" element={<RolesPage />} />
+        <Route path="/Admin/departments" element={<DepartmentsPage />} />
+        <Route path="/Admin/settings" element={<SettingsPage />} />
+        <Route path="/Admin/audit" element={<AuditPage />} />
+        <Route path="/Admin/maintenance" element={<MaintenancePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

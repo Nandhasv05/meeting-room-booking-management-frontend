@@ -12,10 +12,96 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/assets/index-DRWV7XtK.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-U5eEQoMX.css">
+    <script type="module" crossorigin src="/assets/index-yl-Sgorc.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D_9zpYVS.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="boot-splash" class="boot-splash" role="status" aria-live="polite" aria-label="Loading">
+      <div class="boot-spinner">
+        <span class="boot-ring"></span>
+        <span class="boot-ring boot-ring--delay"></span>
+        <img src="/assets/logo.png" alt="evolv" class="boot-logo" />
+      </div>
+      <p class="boot-label">Loading</p>
+    </div>
+    <div id="root"></div>
+    <script>
+      (function () {
+        function hideBoot() {
+          var el = document.getElementById('boot-splash');
+          if (!el) return;
+          el.classList.add('is-out');
+          setTimeout(function () {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          }, 280);
+        }
+        setTimeout(hideBoot, 650);
+      })();
+    </script>
+    <style>
+      .boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(1000px 480px at 6% -6%, rgba(47, 122, 78, 0.1), transparent 55%),
+          linear-gradient(165deg, #f6f8f7 0%, #e8f0eb 50%, #e2ebe5 100%);
+      }
+      .boot-splash.is-out {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.28s ease;
+      }
+      .boot-spinner {
+        position: relative;
+        width: 116px;
+        height: 116px;
+        display: grid;
+        place-items: center;
+      }
+      .boot-ring {
+        position: absolute;
+        inset: 0;
+        border: 2px solid rgba(18, 35, 21, 0.18);
+        border-top-color: #122315;
+        border-radius: 9999px;
+        animation: boot-spin 0.9s linear infinite;
+      }
+      .boot-ring--delay {
+        inset: 8px;
+        border-color: rgba(47, 122, 78, 0.15);
+        border-bottom-color: #2f7a4e;
+        animation-duration: 1.35s;
+        animation-direction: reverse;
+      }
+      .boot-logo {
+        position: relative;
+        z-index: 1;
+        height: 48px;
+        width: auto;
+        -o-object-fit: contain;
+           object-fit: contain;
+        animation: boot-breathe 2.2s ease-in-out infinite;
+      }
+      .boot-label {
+        margin: 14px 0 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(18, 35, 21, 0.5);
+        text-align: center;
+      }
+      @keyframes boot-spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes boot-breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+    </style>
   </body>
 </html>
