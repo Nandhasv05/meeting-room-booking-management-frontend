@@ -12,6 +12,7 @@ const INITIAL_STATE: any = {
 
 const availabilityReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* CHECK AVAILABILITY START *******/
 		case availabilityActionTypes.CHECK_AVAILABILITY_START:
 			return {
 				...state,
@@ -32,6 +33,7 @@ const availabilityReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* CHECK AVAILABILITY RESPONSE RESET END *******/
 		default:
 			return state;
 	}

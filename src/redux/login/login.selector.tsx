@@ -4,15 +4,17 @@
 // Description : Login selectors
 import { createSelector } from 'reselect';
 
-const selectUser = (state: any) => state.login;
+const selectLogin = (state: any) => state.auth;
 
-export const selectCurrentUser = createSelector([selectUser], (login) => login.user);
-export const selectAccessToken = createSelector([selectUser], (login) => login.accessToken);
-
-export const selectRefreshToken = createSelector([selectUser], (login) => login.refreshToken);
-
-export const selectLoginResponse = createSelector([selectUser], (login) => login.loginResponse);
-
-export const selectLoginLoading = createSelector([selectUser], (login) => login.loginLoading);
-
-export const selectIsAuthenticated = createSelector([selectUser], (login) => Boolean(login.accessToken));
+/******* SELECT CURRENT USER *******/
+export const selectCurrentUser = createSelector([selectLogin], (login) => login?.user ?? null);
+/******* SELECT ACCESS TOKEN *******/
+export const selectAccessToken = createSelector([selectLogin], (login) => login?.accessToken ?? null);
+/******* SELECT REFRESH TOKEN *******/
+export const selectRefreshToken = createSelector([selectLogin], (login) => login?.refreshToken ?? null);
+/******* SELECT LOGIN RESPONSE *******/
+export const selectLoginResponse = createSelector([selectLogin], (login) => login?.loginResponse ?? null);
+/******* SELECT LOGIN LOADING *******/
+export const selectLoginLoading = createSelector([selectLogin], (login) => Boolean(login?.loginLoading));
+/******* SELECT IS AUTHENTICATED *******/
+export const selectIsAuthenticated = createSelector([selectLogin], (login) => Boolean(login?.accessToken));

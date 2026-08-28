@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Shared components for dashboard
 import { Link } from 'react-router-dom';
 import { CalendarClock, DoorOpen } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -5,6 +8,7 @@ import { fmtDate } from '../../utils/format';
 import { useAppSelector } from '../../store';
 import { usePermission } from '../../hooks/usePermission';
 
+/******* TYPE *******/
 export type Dash = {
   stats: Record<string, number>;
   utilization: { HallName: string; HoursBooked: number }[];
@@ -34,6 +38,7 @@ export type Dash = {
   }[];
 };
 
+/******* GREETING *******/
 export function greeting() {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning';
@@ -41,6 +46,7 @@ export function greeting() {
   return 'Good evening';
 }
 
+/******* PULSE STAT *******/
 export function PulseStat({
   icon: Icon,
   label,
@@ -73,6 +79,7 @@ export function PulseStat({
   );
 }
 
+/******* WELCOME BAND *******/
 export function WelcomeBand({
   kicker,
   subtitle,

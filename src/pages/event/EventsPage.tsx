@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Events page to view events
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState, PageHeader, Spinner, StatusBadge } from '../../components/ui/Feedback';
@@ -6,27 +9,20 @@ import { fmtDateTime } from '../../utils/format';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchEventsStart } from '../../redux/events/events.action';
 import { selectEvents, selectEventsLoading } from '../../redux/events/events.selector';
-
-type EventRow = {
-  Id: string;
-  EventName: string;
-  EventType: string;
-  HallName: string;
-  StartAt: string;
-  EndAt: string;
-  Status: string;
-  OrganizerName: string;
-  ExpectedAttendees: number;
-};
+import { EventRow } from '../../helpers/event/eventValidation';
 
 export function EventsPage() {
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const data = useAppSelector(selectEvents) as EventRow[] | undefined;
   const isLoading = useAppSelector(selectEventsLoading);
+
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchEventsStart());
   }, [dispatch]);
 
+  /******* COLUMNS *******/
   const columns: Column<EventRow>[] = [
     {
       key: 'event',

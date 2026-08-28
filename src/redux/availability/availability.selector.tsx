@@ -4,8 +4,8 @@
 // Description : availability selectors
 
 import { createSelector } from 'reselect';
-
 const selectSlice = (state: any) => state.availability;
 
+/******* SELECT AVAILABILITY *******/
 export const selectAvailability = createSelector([selectSlice], (slice) => slice.availability);
 export const selectAvailabilityLoading = createSelector([selectSlice], (slice) => slice.availabilityLoading);

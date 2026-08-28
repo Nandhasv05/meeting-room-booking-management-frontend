@@ -5,6 +5,7 @@
 
 import reportsActionTypes from './reports.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'rows': [],
 	'reportLoading': false
@@ -12,6 +13,7 @@ const INITIAL_STATE: any = {
 
 const reportsReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* FETCH REPORT START *******/
 		case reportsActionTypes.FETCH_REPORT_START:
 			return {
 				...state,

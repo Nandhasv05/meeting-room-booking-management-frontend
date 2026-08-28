@@ -5,13 +5,16 @@
 
 import auditActionTypes from './audit.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'auditPage': null,
 	'auditLoading': false
 };
 
+
 const auditReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* FETCH AUDIT LOGS START *******/
 		case auditActionTypes.FETCH_AUDIT_LOGS_START:
 			return {
 				...state,
@@ -32,6 +35,7 @@ const auditReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* FETCH AUDIT LOGS RESPONSE RESET END *******/
 		default:
 			return state;
 	}

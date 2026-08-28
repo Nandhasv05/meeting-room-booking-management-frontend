@@ -2,9 +2,9 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : calendar API services
-
 import { makeApiCall } from '../_common/api.utils';
 
+/******* FETCH CALENDAR CALL *******/
 export const fetchCalendarCall = (payload?: any) => {
 	return makeApiCall('/calendar', payload);
 };

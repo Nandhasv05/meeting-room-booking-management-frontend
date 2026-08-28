@@ -2,9 +2,9 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : bookings action functions
-
 import bookingsActionTypes from './bookings.types';
 
+/******* FETCH BOOKINGS START *******/
 export const fetchBookingsStart = (payload?: any) => ({
 	type: bookingsActionTypes.FETCH_BOOKINGS_START,
 	payload,
@@ -27,7 +27,9 @@ export const fetchBookingsResponseResetStart = () => ({
 export const fetchBookingsResponseChanged = () => ({
 	type: bookingsActionTypes.FETCH_BOOKINGS_RESPONSE_CHANGED,
 });
+/******* FETCH BOOKINGS RESPONSE RESET END *******/
 
+/******* FETCH BOOKING START *******/
 export const fetchBookingStart = (payload?: any) => ({
 	type: bookingsActionTypes.FETCH_BOOKING_START,
 	payload,
@@ -50,7 +52,9 @@ export const fetchBookingResponseResetStart = () => ({
 export const fetchBookingResponseChanged = () => ({
 	type: bookingsActionTypes.FETCH_BOOKING_RESPONSE_CHANGED,
 });
+/******* FETCH BOOKING RESPONSE RESET END *******/
 
+/******* FETCH ATTENDEES START *******/
 export const fetchAttendeesStart = (payload?: any) => ({
 	type: bookingsActionTypes.FETCH_ATTENDEES_START,
 	payload,
@@ -73,7 +77,9 @@ export const fetchAttendeesResponseResetStart = () => ({
 export const fetchAttendeesResponseChanged = () => ({
 	type: bookingsActionTypes.FETCH_ATTENDEES_RESPONSE_CHANGED,
 });
+/******* FETCH ATTENDEES RESPONSE RESET END *******/
 
+/******* CREATE BOOKING START *******/
 export const createBookingStart = (payload?: any) => ({
 	type: bookingsActionTypes.CREATE_BOOKING_START,
 	payload,
@@ -96,7 +102,9 @@ export const createBookingResponseResetStart = () => ({
 export const createBookingResponseChanged = () => ({
 	type: bookingsActionTypes.CREATE_BOOKING_RESPONSE_CHANGED,
 });
+/******* CREATE BOOKING RESPONSE RESET END *******/
 
+/******* CANCEL BOOKING START *******/
 export const cancelBookingStart = (payload?: any) => ({
 	type: bookingsActionTypes.CANCEL_BOOKING_START,
 	payload,
@@ -119,7 +127,9 @@ export const cancelBookingResponseResetStart = () => ({
 export const cancelBookingResponseChanged = () => ({
 	type: bookingsActionTypes.CANCEL_BOOKING_RESPONSE_CHANGED,
 });
+/******* CANCEL BOOKING RESPONSE RESET END *******/
 
+/******* DELETE BOOKING START *******/
 export const deleteBookingStart = (payload?: any) => ({
 	type: bookingsActionTypes.DELETE_BOOKING_START,
 	payload,
@@ -142,3 +152,4 @@ export const deleteBookingResponseResetStart = () => ({
 export const deleteBookingResponseChanged = () => ({
 	type: bookingsActionTypes.DELETE_BOOKING_RESPONSE_CHANGED,
 });
+/******* DELETE BOOKING RESPONSE RESET END *******/

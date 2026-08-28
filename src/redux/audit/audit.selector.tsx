@@ -4,8 +4,8 @@
 // Description : audit selectors
 
 import { createSelector } from 'reselect';
-
 const selectSlice = (state: any) => state.audit;
 
+/******* SELECT AUDIT PAGE *******/
 export const selectAuditPage = createSelector([selectSlice], (slice) => slice.auditPage);
 export const selectAuditLoading = createSelector([selectSlice], (slice) => slice.auditLoading);

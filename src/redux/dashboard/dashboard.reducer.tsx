@@ -5,6 +5,7 @@
 
 import dashboardActionTypes from './dashboard.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'dashboard': null,
 	'dashboardLoading': false,
@@ -12,6 +13,7 @@ const INITIAL_STATE: any = {
 };
 
 const dashboardReducer = (state = INITIAL_STATE, action: any) => {
+	/******* FETCH DASHBOARD START *******/
 	switch (action.type) {
 		case dashboardActionTypes.FETCH_DASHBOARD_START:
 			return {
@@ -36,6 +38,7 @@ const dashboardReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* FETCH DASHBOARD RESPONSE RESET END *******/
 		default:
 			return state;
 	}

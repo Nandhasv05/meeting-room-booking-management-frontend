@@ -5,6 +5,7 @@
 
 import availabilityActionTypes from './availability.types';
 
+/******* CHECK AVAILABILITY START *******/
 export const checkAvailabilityStart = (payload?: any) => ({
 	type: availabilityActionTypes.CHECK_AVAILABILITY_START,
 	payload,
@@ -27,3 +28,4 @@ export const checkAvailabilityResponseResetStart = () => ({
 export const checkAvailabilityResponseChanged = () => ({
 	type: availabilityActionTypes.CHECK_AVAILABILITY_RESPONSE_CHANGED,
 });
+/******* CHECK AVAILABILITY RESPONSE RESET END *******/

@@ -6,11 +6,13 @@
 import { makeApiCall } from '../_common/api.utils';
 import { api } from '../../services/api';
 
+/******* FETCH REPORT CALL *******/
 export const fetchReportCall = (payload?: any) => {
 	const { path, ...params } = payload || {};
 	return makeApiCall(path, params);
 };
 
+/******* EXPORT REPORT CALL *******/
 export const exportReportCall = (payload: any) => {
 	const { type, format, from, to } = payload || {};
 	return api.post(

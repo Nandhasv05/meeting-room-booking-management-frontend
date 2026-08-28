@@ -6,11 +6,13 @@
 import { decryptData, isDecryptFailure } from './enode-decode';
 import { store } from '../../store';
 
+/******* GET TOKEN FROM REDUX *******/
 export const getTokenFromRedux = () => {
 	const state = store.getState() as { auth?: { accessToken?: string | null } };
 	return state.auth?.accessToken || null;
 };
 
+/******* DOCDE HEX RESPONSE *******/
 export const docodeHexResponse = (response: any, key: string) => {
 	try {
 		if (!response || !response.response) {
@@ -25,6 +27,7 @@ export const docodeHexResponse = (response: any, key: string) => {
 	}
 };
 
+/******* DECODE API RESPONSE *******/
 export const decodeApiResponse = (jsonData: any, key: string) => {
 	try {
 		if (!jsonData) {
@@ -39,4 +42,5 @@ export const decodeApiResponse = (jsonData: any, key: string) => {
 	}
 };
 
+/******* IS DECRYPT FAILURE *******/
 export { isDecryptFailure };

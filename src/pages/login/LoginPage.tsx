@@ -1,7 +1,9 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Login page to login to the system
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { userSignInStart, userSignInResponseResetStart } from '../../redux/login/login.action';
@@ -11,28 +13,17 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { GhostButton, inputClass, PrimaryButton } from '../../components/ui/Form';
 import { BrandLogo } from '../../components/brand/BrandLogo';
 import { LogoSpinner } from '../../components/brand/LogoSpinner';
-
-const loginSchema = z.object({
-  email: z.string().email('Enter a valid email').min(1, 'Email is required'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
-const TEST_USERS = [
-  { label: 'Admin', email: 'admin@evoloclothing.com' },
-  { label: 'Manager', email: 'manager@evlovcolthing.com' },
-  { label: 'Nandhakumar', email: 'nandhakumar@evolvclothing.com' },
-] as const;
-
-const TEST_PASSWORD = 'password#1';
+import { loginSchema, LoginFormData, TEST_PASSWORD, TEST_USERS } from '../../helpers/login/loginValidation';
 
 export function LoginPage() {
+
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const loginResponse = useAppSelector(selectLoginResponse);
   const loginLoading = useAppSelector(selectLoginLoading);
 
+  /******* FORM *******/
   const {
     register,
     handleSubmit,
@@ -46,23 +37,28 @@ export function LoginPage() {
     },
   });
 
+  /******* HANDLERS *******/
   const resetLogin = useCallback(() => {
     dispatch(userSignInResponseResetStart());
   }, [dispatch]);
 
+  /******* EFFECTS *******/
   useReduxResponse(loginResponse, resetLogin, () => {
     toast.success('Welcome back.');
     navigate('/');
   });
 
+  /******* HANDLERS *******/
   const signIn = (email: string, password: string) => {
     dispatch(userSignInStart({ email, password }));
   };
 
+  /******* HANDLERS *******/
   const onSubmit = (data: LoginFormData) => {
     signIn(data.email, data.password);
   };
 
+  /******* EFFECTS *******/
   useEffect(() => {
     return () => {
       dispatch(userSignInResponseResetStart());
@@ -172,3 +168,4 @@ export function LoginPage() {
     </div>
   );
 }
+export default LoginPage;

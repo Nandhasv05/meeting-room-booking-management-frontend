@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : My bookings page to view my bookings
 import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
@@ -12,19 +15,28 @@ import { fetchBookingsStart } from '../../redux/bookings/bookings.action';
 import { selectBookingsLoading, selectBookingsPage } from '../../redux/bookings/bookings.selector';
 import { Tab } from '../../helpers/booking/bookingValidation';
 import { tabs } from '../../helpers/booking/bookingValidation';
+
+
 export function MyBookingsPage() {
-  
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const [params, setParams] = useSearchParams();
   const tab = (params.get('tab') ?? 'upcoming') as Tab;
   const q = params.get('q') ?? '';
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectBookingsPage) as Paged<Booking> | null;
   const isLoading = useAppSelector(selectBookingsLoading);
+
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchBookingsStart({ tab, q: q || undefined, pageSize: 50 }));
   }, [tab, q, dispatch]);
+
+  /******* REALTIME *******/
   useRealtime(['dashboard'], () => dispatch(fetchBookingsStart({ tab, q: q || undefined, pageSize: 50 })));
 
+  /******* COLUMNS *******/
   const columns: Column<Booking>[] = [
     {
       key: 'event',

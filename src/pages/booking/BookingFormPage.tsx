@@ -1,27 +1,15 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Booking form page to create a new booking
 import { useCallback, useEffect } from 'react';
-import { FormProvider, useForm, useFormContext } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import {
-  AlertTriangle,
-  Building2,
-  CalendarRange,
-  CheckCircle2,
-  Clock,
-  FileText,
-  Loader2,
-  MapPin,
-  Tag,
-  Users,
-} from 'lucide-react';
 import type { Hall } from '../../types/api';
-import { EVENT_TYPES } from '../../types/api';
 import { Spinner } from '../../components/ui/Feedback';
 import { celebrate } from '../../components/ui/SuccessFx';
-import { GhostButton, PrimaryButton } from '../../components/ui/Form';
-import { EmployeePicker, type PickedEmployee } from '../../components/booking/EmployeePicker';;
+import type { PickedEmployee } from '../../components/booking/EmployeePicker';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchHallsStart } from '../../redux/halls/halls.action';
 import { selectHalls, selectHallsLoading } from '../../redux/halls/halls.selector';
@@ -31,11 +19,23 @@ import { createBookingResponseResetStart, createBookingStart } from '../../redux
 import { selectCreateBookingLoading, selectCreateBookingResponse } from '../../redux/bookings/bookings.selector';
 import { selectCurrentUser } from '../../redux/login/login.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
+import { Composer } from '../../components/booking/BookingComposer';
+import {
+  cleanMailText,
+  defaults,
+  isMailId,
+  parseEmails,
+  schema,
+  type Values,
+} from '../../helpers/booking/bookingFromValidations';
 
 export function BookingFormPage() {
+  /******* STATE *******/
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  /******* SELECTORS *******/
   const signedIn = useAppSelector(selectCurrentUser);
   const halls = useAppSelector(selectHalls) as Hall[] | undefined;
   const isLoading = useAppSelector(selectHallsLoading);
@@ -43,11 +43,13 @@ export function BookingFormPage() {
   const pending = useAppSelector(selectCreateBookingLoading);
   const createResponse = useAppSelector(selectCreateBookingResponse);
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchHallsStart({ active: 'true' }));
     dispatch(fetchDepartmentsStart());
   }, [dispatch]);
 
+  /******* FORM *******/
   const methods = useForm<Values>({
     resolver: zodResolver(schema as never) as never,
     defaultValues: {
@@ -66,6 +68,7 @@ export function BookingFormPage() {
     },
   });
 
+  /******* HANDLERS *******/
   const resetCreate = useCallback(() => dispatch(createBookingResponseResetStart()), [dispatch]);
   useReduxResponse(createResponse, resetCreate, (response) => {
     const booking = response as { data?: { Id: string; inviteMail?: { configured: boolean; sent: number; failed: number; error?: string } } };

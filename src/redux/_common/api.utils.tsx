@@ -1,6 +1,5 @@
-// Version : 0.0.1
-// Author : NANDHAKUMAR S V
-// Date : 27/08/2026
+// AUTHOR : NANDHAKUMAR S V
+// DATE : 28/08/2026
 // Description : Centralized API helper used by every Redux service
 
 import { api } from '../../services/api';

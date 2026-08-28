@@ -1,7 +1,9 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Facilities page to view facilities
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { celebrate } from '../../components/ui/SuccessFx';
 import { EmptyState, PageHeader, Spinner } from '../../components/ui/Feedback';
 import { Field as Labeled, inputClass, PrimaryButton } from '../../components/ui/Form';
@@ -20,33 +22,32 @@ import {
   selectFacilitiesLoading,
 } from '../../redux/halls/halls.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-type Fac = { Id: string; Code: string; Name: string; IsActive: boolean };
-
-const schema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-});
-
-type FormData = z.infer<typeof schema>;
+import { Fac, schema, FormData } from '../../helpers/hall/facililitesValidation';
 
 export function FacilitiesPage() {
+
+  /******* STATE *******/
   const { can } = usePermission();
   const dispatch = useAppDispatch();
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectFacilities) as Fac[] | undefined;
   const isLoading = useAppSelector(selectFacilitiesLoading);
   const creating = useAppSelector(selectCreateFacilityLoading);
   const createResponse = useAppSelector(selectCreateFacilityResponse);
 
+  /******* FORM *******/
   const { register, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { code: '', name: '' },
   });
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchFacilitiesStart());
   }, [dispatch]);
 
+  /******* HANDLERS *******/
   const resetCreate = useCallback(() => dispatch(createFacilityResponseResetStart()), [dispatch]);
   useReduxResponse(createResponse, resetCreate, () => {
     celebrate('Facility added');
@@ -95,3 +96,4 @@ export function FacilitiesPage() {
     </div>
   );
 }
+export default FacilitiesPage;

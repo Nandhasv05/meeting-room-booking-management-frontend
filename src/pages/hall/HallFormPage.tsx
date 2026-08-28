@@ -1,7 +1,9 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Hall form page to create and edit hall
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Building2, Clock, DoorOpen, Hash, LayoutGrid, MapPin, Sparkles, Users } from 'lucide-react';
 import type { Hall } from '../../types/api';
@@ -24,62 +26,31 @@ import {
   selectSaveHallResponse,
 } from '../../redux/halls/halls.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-const schema = z
-  .object({
-    name: z.string().min(1, 'Hall name is required'),
-    code: z.string().min(1, 'Hall code is required'),
-    description: z.string().optional(),
-    location: z.string().optional(),
-    building: z.string().optional(),
-    floor: z.string().optional(),
-    capacity: z.coerce.number().positive('Capacity must be at least 1'),
-    hallType: z.string().min(1),
-    openingTime: z.string().min(1, 'Opening time is required'),
-    closingTime: z.string().min(1, 'Closing time is required'),
-    facilityIds: z.array(z.string()),
-    layouts: z.array(z.object({ name: z.string(), capacity: z.number(), isDefault: z.boolean() })),
-  })
-  .refine((v) => !v.openingTime || !v.closingTime || v.closingTime > v.openingTime, {
-    message: 'Closing must be after opening',
-    path: ['closingTime'],
-  });
-
-const field =
-  'w-full rounded-xl border border-navy-800/10 bg-white px-3 py-2 text-sm text-ink outline-none transition placeholder:text-navy-800/30 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10 disabled:bg-mist/50 disabled:text-navy-800/50';
-
-type Values = {
-  name: string;
-  code: string;
-  description: string;
-  location: string;
-  building: string;
-  floor: string;
-  capacity: number;
-  hallType: string;
-  openingTime: string;
-  closingTime: string;
-  facilityIds: string[];
-  layouts: { name: string; capacity: number; isDefault: boolean }[];
-};
+import { hallField, hallSchema, HallInput, HallValues } from '@/helpers/hall/facililitesValidation';
 
 export function HallFormPage() {
+
+  /******* STATE *******/
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  /******* SELECTORS *******/
   const existing = useAppSelector(selectHall) as Hall | null;
   const isLoading = useAppSelector(selectHallLoading);
   const facilities = useAppSelector(selectFacilities) as { Id: string; Name: string }[] | undefined;
   const savePending = useAppSelector(selectSaveHallLoading);
   const saveResponse = useAppSelector(selectSaveHallResponse);
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchFacilitiesStart());
     if (id) dispatch(fetchHallStart({ id }));
   }, [id, dispatch]);
 
+  /******* HANDLERS *******/
   const source = id ? existing : null;
-  const initial: Values = {
+  const initial: HallInput = {
     name: source?.Name ?? '',
     code: source?.Code ?? '',
     description: source?.Description ?? '',
@@ -94,6 +65,7 @@ export function HallFormPage() {
     layouts: [{ name: 'Theatre', capacity: source?.Capacity ?? 20, isDefault: true }],
   };
 
+  /******* FORM *******/
   const {
     register,
     handleSubmit,
@@ -101,18 +73,19 @@ export function HallFormPage() {
     setValue,
     reset,
     formState: { errors },
-  } = useForm<Values>({
-    resolver: zodResolver(schema),
+  } = useForm<HallInput, unknown, HallValues>({
+    resolver: zodResolver(hallSchema),
     defaultValues: initial,
   });
 
   const values = watch();
 
+  /******* EFFECTS *******/
   useEffect(() => {
     reset(initial);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existing, id, reset]);
 
+  /******* HANDLERS *******/
   const resetSave = useCallback(() => dispatch(saveHallResponseResetStart()), [dispatch]);
   useReduxResponse(saveResponse, resetSave, () => {
     celebrate(id ? 'Hall updated' : 'Hall created', 'It is now available for bookings.');
@@ -166,24 +139,24 @@ export function HallFormPage() {
                 <Section icon={Building2} title="Identity" hint="How the hall is named and found.">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Labelled label="Hall name" error={errors.name?.message}>
-                      <input placeholder="Auditorium" className={field} {...register('name')} />
+                      <input placeholder="Auditorium" className={hallField} {...register('name')} />
                     </Labelled>
                     <Labelled
                       label="Hall code"
                       hint={id ? 'Fixed after creation' : 'Short unique ID, e.g. AUD-1'}
                       error={errors.code?.message}
                     >
-                      <input placeholder="AUD-1" className={field} disabled={Boolean(id)} {...register('code')} />
+                      <input placeholder="AUD-1" className={hallField} disabled={Boolean(id)} {...register('code')} />
                     </Labelled>
                     <Labelled label="Building">
-                      <input placeholder="Tower C" className={field} {...register('building')} />
+                      <input placeholder="Tower C" className={hallField} {...register('building')} />
                     </Labelled>
                     <Labelled label="Floor">
-                      <input placeholder="Ground" className={field} {...register('floor')} />
+                        <input placeholder="Ground" className={hallField} {...register('floor')} />
                     </Labelled>
                     <div className="sm:col-span-2">
                       <Labelled label="Location">
-                        <input placeholder="Near the east lifts" className={field} {...register('location')} />
+                        <input placeholder="Near the east lifts" className={hallField} {...register('location')} />
                       </Labelled>
                     </div>
                     <div className="sm:col-span-2">
@@ -191,7 +164,7 @@ export function HallFormPage() {
                         <textarea
                           rows={3}
                           placeholder="What this hall is best suited for"
-                          className={`${field} resize-y`}
+                          className={`${hallField} resize-y`}
                           {...register('description')}
                         />
                       </Labelled>
@@ -202,20 +175,20 @@ export function HallFormPage() {
                 <Section icon={LayoutGrid} title="Capacity & hours" hint="Used to validate every booking request.">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <Labelled label="Capacity" error={errors.capacity?.message}>
-                      <input type="number" min={1} className={field} {...register('capacity')} />
+                      <input type="number" min={1} className={hallField} {...register('capacity')} />
                     </Labelled>
                     <Labelled label="Hall type">
-                      <select className={field} {...register('hallType')}>
+                      <select className={hallField} {...register('hallType')}>
                         {HALL_TYPES.map((t) => (
                           <option key={t}>{t}</option>
                         ))}
                       </select>
                     </Labelled>
                     <Labelled label="Opens">
-                      <input type="time" className={field} {...register('openingTime')} />
+                        <input type="time" className={hallField} {...register('openingTime')} />
                     </Labelled>
                     <Labelled label="Closes" error={errors.closingTime?.message}>
-                      <input type="time" className={field} {...register('closingTime')} />
+                      <input type="time" className={hallField} {...register('closingTime')} />
                     </Labelled>
                   </div>
                 </Section>
@@ -262,11 +235,12 @@ export function HallFormPage() {
   );
 }
 
+// HALL PREVIEW COMPONENT
 function HallPreview({
   values,
   facilities,
 }: {
-  values: Values;
+  values: HallInput;
   facilities: { Id: string; Name: string }[];
 }) {
   const picked = facilities.filter((f) => values.facilityIds.includes(f.Id));
@@ -310,6 +284,7 @@ function HallPreview({
   );
 }
 
+// PREVIEW ROW COMPONENT
 function PreviewRow({ icon: Icon, label, value }: { icon: typeof Clock; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2.5">
@@ -324,6 +299,8 @@ function PreviewRow({ icon: Icon, label, value }: { icon: typeof Clock; label: s
   );
 }
 
+
+// SECTION COMPONENT
 function Section({
   icon: Icon,
   title,
@@ -351,6 +328,7 @@ function Section({
   );
 }
 
+// LABELED COMPONENT
 function Labelled({
   label,
   hint,
@@ -373,3 +351,4 @@ function Labelled({
     </label>
   );
 }
+export default HallFormPage;

@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Maintenance page to view maintenance
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,45 +27,34 @@ import {
   selectMaintenanceLoading,
 } from '../../redux/maintenance/maintenance.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-type Maint = {
-  Id: string;
-  HallName: string;
-  Title: string;
-  StartAt: string;
-  EndAt: string;
-  Status: string;
-};
-
-const schema = z.object({
-  hallId: z.string().min(1, 'Hall is required'),
-  title: z.string().min(1, 'Title is required'),
-  startAt: z.string().min(1, 'Start is required'),
-  endAt: z.string().min(1, 'End is required'),
-  description: z.string().optional(),
-});
-
-type FormData = z.infer<typeof schema>;
+import { Maint, schema, FormData } from '../../helpers/setting/settingValidation';
 
 export function MaintenancePage() {
+
+  /******* STATE *******/
   const { can } = usePermission();
   const dispatch = useAppDispatch();
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectMaintenance) as Maint[] | undefined;
   const isLoading = useAppSelector(selectMaintenanceLoading);
   const halls = useAppSelector(selectHalls) as Hall[] | undefined;
   const creating = useAppSelector(selectCreateMaintenanceLoading);
   const createResponse = useAppSelector(selectCreateMaintenanceResponse);
 
+  /******* FORM *******/
   const { register, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { hallId: '', title: '', startAt: '', endAt: '', description: '' },
   });
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchMaintenanceStart());
     dispatch(fetchHallsStart());
   }, [dispatch]);
 
+  /******* HANDLERS *******/
   const resetCreate = useCallback(() => dispatch(createMaintenanceResponseResetStart()), [dispatch]);
   useReduxResponse(createResponse, resetCreate, () => {
     celebrate('Maintenance scheduled', 'The hall is blocked for that window.');
@@ -70,6 +62,7 @@ export function MaintenancePage() {
     dispatch(fetchMaintenanceStart());
   });
 
+  /******* COLUMNS *******/
   const columns: Column<Maint>[] = [
     { key: 'hall', header: 'Hall', render: (m) => <span className="font-semibold text-navy-900">{m.HallName}</span> },
     { key: 'title', header: 'Title', render: (m) => m.Title },
@@ -140,3 +133,4 @@ export function MaintenancePage() {
     </div>
   );
 }
+export default MaintenancePage;

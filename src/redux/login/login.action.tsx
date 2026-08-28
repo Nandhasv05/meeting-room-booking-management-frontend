@@ -5,6 +5,7 @@
 
 import {loginActionTypes} from './login.types';
 
+/******* USER SIGN IN START *******/
 export const userSignInStart = (userCredentials: any) => ({
 	type: loginActionTypes.USER_SIGN_IN_START,
 	payload: userCredentials,
@@ -28,11 +29,13 @@ export const userSignInResponseChanged = () => ({
 	type: loginActionTypes.USER_SIGN_IN_RESPONSE_CHANGED,
 });
 
+/******* SET SESSION *******/
 export const setSession = (session: any) => ({
 	type: loginActionTypes.SET_SESSION,
 	payload: session,
 });
 
+/******* USER SIGN OUT START *******/
 export const userSignInLogOutStart = () => ({
 	type: loginActionTypes.USER_SIGN_OUT_START,
 });

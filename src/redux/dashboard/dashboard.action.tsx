@@ -5,6 +5,7 @@
 
 import dashboardActionTypes from './dashboard.types';
 
+/******* FETCH DASHBOARD START *******/
 export const fetchDashboardStart = (payload?: any) => ({
 	type: dashboardActionTypes.FETCH_DASHBOARD_START,
 	payload,
@@ -27,3 +28,5 @@ export const fetchDashboardResponseResetStart = () => ({
 export const fetchDashboardResponseChanged = () => ({
 	type: dashboardActionTypes.FETCH_DASHBOARD_RESPONSE_CHANGED,
 });
+
+/******* FETCH DASHBOARD RESPONSE RESET END *******/

@@ -15,6 +15,7 @@ import {
 } from './audit.action';
 import { invokeApi } from '../_common/saga.utils';
 
+/******* FETCH AUDIT LOGS DETAILS *******/
 function* fetchAuditLogsDetails({ payload }: any) {
 	yield* invokeApi(fetchAuditLogsCall, payload, fetchAuditLogsSuccess, fetchAuditLogsFailure);
 }
@@ -30,7 +31,9 @@ function* onFetchAuditLogsStart() {
 function* onFetchAuditLogsReset() {
 	yield takeLatest(auditActionTypes.FETCH_AUDIT_LOGS_RESPONSE_RESET_START, fetchAuditLogsReset);
 }
+/******* FETCH AUDIT LOGS DETAILS END *******/
 
+/******* AUDIT SAGA *******/
 export function* auditSaga() {
 	yield all([call(onFetchAuditLogsStart), call(onFetchAuditLogsReset)]);
 }

@@ -5,10 +5,12 @@
 
 import { makeApiCall } from '../_common/api.utils';
 
+/******* FETCH MAINTENANCE CALL *******/
 export const fetchMaintenanceCall = (payload?: any) => {
 	return makeApiCall('/maintenance', payload);
 };
 
+/******* CREATE MAINTENANCE CALL *******/
 export const createMaintenanceCall = (payload?: any) => {
 	return makeApiCall('/maintenance/create', payload);
 };

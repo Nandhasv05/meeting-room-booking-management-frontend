@@ -5,6 +5,7 @@
 
 import notificationsActionTypes from './notifications.types';
 
+/******* FETCH NOTIFICATIONS START *******/
 export const fetchNotificationsStart = (payload?: any) => ({
 	type: notificationsActionTypes.FETCH_NOTIFICATIONS_START,
 	payload,
@@ -28,6 +29,7 @@ export const fetchNotificationsResponseChanged = () => ({
 	type: notificationsActionTypes.FETCH_NOTIFICATIONS_RESPONSE_CHANGED,
 });
 
+/******* READ NOTIFICATION START *******/
 export const readNotificationStart = (payload?: any) => ({
 	type: notificationsActionTypes.READ_NOTIFICATION_START,
 	payload,
@@ -51,6 +53,7 @@ export const readNotificationResponseChanged = () => ({
 	type: notificationsActionTypes.READ_NOTIFICATION_RESPONSE_CHANGED,
 });
 
+/******* READ ALL NOTIFICATIONS START *******/
 export const readAllNotificationsStart = (payload?: any) => ({
 	type: notificationsActionTypes.READ_ALL_NOTIFICATIONS_START,
 	payload,

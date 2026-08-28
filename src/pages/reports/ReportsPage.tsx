@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Reports page to view reports
 import { useEffect, useState } from 'react';
 import { Download, FileText } from 'lucide-react';
 import { EmptyState, Spinner } from '../../components/ui/Feedback';
@@ -8,41 +11,37 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchReportStart } from '../../redux/reports/reports.action';
 import { selectReportLoading, selectRows } from '../../redux/reports/reports.selector';
 import { exportReportCall } from '../../redux/reports/reports.services';
-
-const tabs = [
-  ['bookings', 'Bookings'],
-  ['utilization', 'Utilization'],
-  ['departments', 'Departments'],
-  ['cancellations', 'Cancellations'],
-  ['peak-hours', 'Peak hours'],
-] as const;
-
-type ReportType = (typeof tabs)[number][0];
-type Row = Record<string, unknown>;
-
-function humanize(key: string) {
-  return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
-}
+import { tabs, ReportType, humanizeKey } from '../../helpers/reports/reportsValidation';
 
 export function ReportsPage() {
+
+  /******* STATE *******/
   const { can } = usePermission();
   const dispatch = useAppDispatch();
   const [type, setType] = useState<ReportType>('bookings');
   const [from, setFrom] = useState(new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
   const [to, setTo] = useState(new Date().toISOString().slice(0, 10));
+
+  /******* SELECTORS *******/
   const path =
     type === 'peak-hours' ? '/reports/peak-hours' : type === 'cancellations' ? '/reports/cancellations' : `/reports/${type}`;
-  const data = useAppSelector(selectRows) as Row[] | undefined;
+  const data = useAppSelector(selectRows) as Record<string, unknown>[] | undefined;
   const isLoading = useAppSelector(selectReportLoading);
+
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchReportStart({ path, from, to }));
   }, [path, from, to, dispatch]);
+
+
   const rows = data ?? [];
-  const columns: Column<Row>[] = (rows[0] ? Object.keys(rows[0]) : []).map((key) => ({
+  const columns: Column<Record<string, unknown>>[] = (rows[0] ? Object.keys(rows[0]) : []).map((key) => ({
     key,
-    header: humanize(key),
+    header: humanizeKey(key),
     render: (row) => String(row[key] ?? '—'),
   }));
+
+  /******* HANDLERS *******/
   const download = async (format: 'xlsx' | 'pdf') => {
     const res = await exportReportCall({ type, format, from, to });
     const url = URL.createObjectURL(res.data as Blob);
@@ -52,6 +51,8 @@ export function ReportsPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  
   return (
     <div>
       <div className="mb-4">
@@ -89,3 +90,5 @@ export function ReportsPage() {
     </div>
   );
 }
+export default ReportsPage;
+

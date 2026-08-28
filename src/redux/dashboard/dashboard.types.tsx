@@ -4,11 +4,12 @@
 // Description : dashboard action types
 
 const dashboardActionTypes = {
+	/******* FETCH DASHBOARD START *******/
 	FETCH_DASHBOARD_START: 'fetch_dashboard_start',
 	FETCH_DASHBOARD_SUCCESS: 'fetch_dashboard_success',
 	FETCH_DASHBOARD_FAILURE: 'fetch_dashboard_failure',
 	FETCH_DASHBOARD_RESPONSE_RESET_START: 'fetch_dashboard_response_reset_start',
 	FETCH_DASHBOARD_RESPONSE_CHANGED: 'fetch_dashboard_response_changed',
-
+	/******* FETCH DASHBOARD RESPONSE RESET END *******/
 };
 export default dashboardActionTypes;

@@ -6,8 +6,8 @@
 import { loginActionTypes } from './login.types';
 import { clearAuthStorage, loadAuth, persistAuth } from '../_common/authStorage';
 
+/******* INITIAL STATE *******/
 const stored = loadAuth();
-
 const INITIAL_STATE: any = {
 	user: stored.user ?? null,
 	accessToken: stored.accessToken ?? null,
@@ -16,6 +16,7 @@ const INITIAL_STATE: any = {
 	loginLoading: false,
 };
 
+/******* PERSIST FROM STATE *******/
 const persistFromState = (state: any) => {
 	persistAuth({
 		user: state.user,
@@ -24,8 +25,10 @@ const persistFromState = (state: any) => {
 	});
 };
 
+/******* LOGIN REDUCER *******/
 const loginReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* USER SIGN IN START *******/
 		case loginActionTypes.USER_SIGN_IN_START:
 			return {
 				...state,
@@ -60,6 +63,7 @@ const loginReducer = (state = INITIAL_STATE, action: any) => {
 				loginResponse: null,
 			};
 
+		/******* SET SESSION *******/
 		case loginActionTypes.SET_SESSION: {
 			const next = {
 				...state,

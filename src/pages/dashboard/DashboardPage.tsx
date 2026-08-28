@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Dashboard page to view dashboard
 import { useEffect } from 'react';
 import { ErrorState, Spinner } from '../../components/ui/Feedback';
 import { PrimaryButton } from '../../components/ui/Form';
@@ -11,16 +14,20 @@ import { ManagerDashboard } from './ManagerDashboard';
 import type { Dash } from './shared';
 
 export function DashboardPage() {
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const role = useAppSelector(selectCurrentUser)?.roleCode;
   const data = useAppSelector(selectDashboard) as Dash | null;
   const isLoading = useAppSelector(selectDashboardLoading);
   const error = useAppSelector(selectDashboardError);
+
+  /******* EFFECTS *******/
   useRealtime(['dashboard'], () => dispatch(fetchDashboardStart()));
   useEffect(() => {
     dispatch(fetchDashboardStart());
   }, [dispatch]);
 
+  /******* RENDER *******/
   if (isLoading && !data) return <Spinner />;
   if (error || !data) {
     return (

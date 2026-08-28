@@ -1,3 +1,6 @@
+// AUTHOR : NANDHAKUMAR S V
+// DATE : 28/08/2026
+// DESCRIPTION : Encryption and decryption utilities
 import CryptoJS from 'crypto-js';
 
 // Fixed IV for legacy (v1) encryption only
@@ -5,17 +8,13 @@ const LEGACY_IV = CryptoJS.enc.Utf8.parse(
 	'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
 );
 
+/******* HASH MD5 *******/
 export const hashMD5 = (data: string) => {
 	const md5Key = CryptoJS.MD5(data).toString();
 	return CryptoJS.enc.Utf8.parse(md5Key);
 };
 
-// Different finance-API PHP components read the same logical "company id" under
-// different field names (InfogID, Infog_CompanyID, InfogCompanyID, infogCompanyID,
-// CompanyID, companyID, MFICompanyID, infogID). Until the API is normalised,
-// mirror whichever alias the caller set under all the others before encrypting
-// so every PHP component finds the value. Purely additive: if a saga already
-// set a specific alias to a non-empty value, that value is preserved.
+/******* NORMALISE COMPANY ID ALIASES *******/
 const COMPANY_ID_ALIASES = [
 	'InfogID', 'Infog_CompanyID', 'InfogCompanyID', 'infogCompanyID',
 	'CompanyID', 'companyID', 'MFICompanyID', 'infogID',

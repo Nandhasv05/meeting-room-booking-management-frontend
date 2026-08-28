@@ -5,6 +5,7 @@
 
 import maintenanceActionTypes from './maintenance.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'maintenance': [],
 	'maintenanceLoading': false,
@@ -14,6 +15,7 @@ const INITIAL_STATE: any = {
 
 const maintenanceReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* FETCH MAINTENANCE START *******/
 		case maintenanceActionTypes.FETCH_MAINTENANCE_START:
 			return {
 				...state,
@@ -35,6 +37,7 @@ const maintenanceReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* CREATE MAINTENANCE START *******/
 		case maintenanceActionTypes.CREATE_MAINTENANCE_START:
 			return {
 				...state,
@@ -57,6 +60,7 @@ const maintenanceReducer = (state = INITIAL_STATE, action: any) => {
 				...state,
 				createMaintenanceResponse: null,
 			};
+		/******* CREATE MAINTENANCE END *******/
 		default:
 			return state;
 	}

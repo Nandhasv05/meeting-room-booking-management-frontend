@@ -5,6 +5,7 @@
 
 import bookingsActionTypes from './bookings.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'bookingsPage': null,
 	'bookingsLoading': false,
@@ -22,6 +23,7 @@ const INITIAL_STATE: any = {
 
 const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* FETCH BOOKINGS START *******/
 		case bookingsActionTypes.FETCH_BOOKINGS_START:
 			return {
 				...state,
@@ -42,6 +44,9 @@ const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* FETCH BOOKINGS RESPONSE RESET END *******/
+
+		/******* FETCH BOOKING START *******/
 		case bookingsActionTypes.FETCH_BOOKING_START:
 			return {
 				...state,
@@ -62,6 +67,9 @@ const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* FETCH BOOKING RESPONSE RESET END *******/
+
+		/******* FETCH ATTENDEES START *******/
 		case bookingsActionTypes.FETCH_ATTENDEES_START:
 			return {
 				...state,
@@ -83,6 +91,9 @@ const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* FETCH ATTENDEES RESPONSE RESET END *******/
+
+		/******* CREATE BOOKING START *******/
 		case bookingsActionTypes.CREATE_BOOKING_START:
 			return {
 				...state,
@@ -105,6 +116,9 @@ const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 				...state,
 				createBookingResponse: null,
 			};
+		/******* CREATE BOOKING RESPONSE RESET END *******/
+
+		/******* CANCEL BOOKING START *******/
 		case bookingsActionTypes.CANCEL_BOOKING_START:
 			return {
 				...state,
@@ -127,6 +141,9 @@ const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 				...state,
 				cancelBookingResponse: null,
 			};
+		/******* CANCEL BOOKING RESPONSE RESET END *******/
+
+		/******* DELETE BOOKING START *******/
 		case bookingsActionTypes.DELETE_BOOKING_START:
 			return {
 				...state,
@@ -149,6 +166,7 @@ const bookingsReducer = (state = INITIAL_STATE, action: any) => {
 				...state,
 				deleteBookingResponse: null,
 			};
+		/******* DELETE BOOKING RESPONSE RESET END *******/
 		default:
 			return state;
 	}

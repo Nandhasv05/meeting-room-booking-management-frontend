@@ -1,20 +1,14 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Notifications page to view notifications
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Bell,
-  CalendarPlus,
-  CheckCheck,
-  CircleDot,
-  Clock3,
-  Flag,
-  Play,
-  XCircle,
-} from 'lucide-react';
-import { formatDistanceToNow, isToday, isYesterday, parseISO } from 'date-fns';
+import { Bell, CalendarPlus, CheckCheck, CircleDot, Clock3, Flag, Play, XCircle } from 'lucide-react';
+import { formatDistanceToNow, isToday } from 'date-fns';
+import { parseAppDate } from '../../utils/format';
 import { EmptyState, Spinner } from '../../components/ui/Feedback';
 import { GhostButton } from '../../components/ui/Form';
 import { TabPills } from '../../components/ui/Surface';
-import { fmtDateTime } from '../../utils/format';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
   fetchNotificationsStart,
@@ -31,100 +25,37 @@ import {
   selectReadNotificationResponse,
 } from '../../redux/notifications/notifications.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-type N = {
-  Id: string;
-  Title: string;
-  Message: string;
-  IsRead: boolean;
-  CreatedAt: string;
-  Type: string;
-  RelatedModule: string | null;
-  RelatedId: string | null;
-};
-
-const FILTERS = [
-  ['all', 'All'],
-  ['unread', 'Unread'],
-  ['bookings', 'Bookings'],
-  ['events', 'Events'],
-] as const;
-
-type Filter = (typeof FILTERS)[number][0];
-
-function tone(type: string) {
-  if (type.includes('CANCEL') || type.includes('REJECT')) return 'rose';
-  if (type.includes('START') || type === 'ONGOING') return 'live';
-  if (type.includes('COMPLETE') || type.includes('APPROV')) return 'signal';
-  if (type.includes('REMIND')) return 'amber';
-  return 'brand';
-}
-
-function TypeIcon({ type }: { type: string }) {
-  if (type.includes('CREATED')) return <CalendarPlus className="h-4 w-4" />;
-  if (type.includes('CANCEL') || type.includes('REJECT')) return <XCircle className="h-4 w-4" />;
-  if (type.includes('START')) return <Play className="h-4 w-4" />;
-  if (type.includes('COMPLETE')) return <Flag className="h-4 w-4" />;
-  if (type.includes('REMIND')) return <Clock3 className="h-4 w-4" />;
-  return <Bell className="h-4 w-4" />;
-}
-
-function iconClass(kind: string, unread: boolean) {
-  const base = unread ? '' : 'opacity-70 ';
-  if (kind === 'rose') return `${base}bg-rose-50 text-rose-700`;
-  if (kind === 'live') return `${base}bg-brand-100 text-brand-600`;
-  if (kind === 'signal') return `${base}bg-signal/12 text-signal`;
-  if (kind === 'amber') return `${base}bg-amber-50 text-amber-800`;
-  return `${base}bg-brand-50 text-brand-600`;
-}
-
-function dayLabel(iso: string) {
-  const d = parseISO(iso);
-  if (isToday(d)) return 'Today';
-  if (isYesterday(d)) return 'Yesterday';
-  return fmtDateTime(iso).split(' · ')[0] ?? 'Earlier';
-}
-
-function groupByDay(items: N[]) {
-  const map = new Map<string, N[]>();
-  for (const n of items) {
-    const key = dayLabel(n.CreatedAt);
-    const list = map.get(key) ?? [];
-    list.push(n);
-    map.set(key, list);
-  }
-  return [...map.entries()];
-}
-
-function matches(n: N, filter: Filter) {
-  if (filter === 'unread') return !n.IsRead;
-  if (filter === 'bookings') return n.Type.startsWith('BOOKING');
-  if (filter === 'events') return n.Type.startsWith('EVENT') || n.Type.includes('REMIND');
-  return true;
-}
+import { FILTERS, Filter, N, matches, groupByDay, iconClass, tone } from '../../helpers/setting/settingValidation';
 
 export function NotificationsPage() {
+
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const [filter, setFilter] = useState<Filter>('all');
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectNotifications) as { items: N[]; unread: number } | null;
   const isLoading = useAppSelector(selectNotificationsLoading);
   const readOneResponse = useAppSelector(selectReadNotificationResponse);
   const readAllResponse = useAppSelector(selectReadAllResponse);
   const readAllPending = useAppSelector(selectReadAllLoading);
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchNotificationsStart());
   }, [dispatch]);
 
+  /******* HANDLERS *******/
   const resetReadOne = useCallback(() => dispatch(readNotificationResponseResetStart()), [dispatch]);
   const resetReadAll = useCallback(() => dispatch(readAllNotificationsResponseResetStart()), [dispatch]);
   useReduxResponse(readOneResponse, resetReadOne, () => dispatch(fetchNotificationsStart()));
   useReduxResponse(readAllResponse, resetReadAll, () => dispatch(fetchNotificationsStart()));
 
+  /******* MEMO *******/
   const items = data?.items ?? [];
   const visible = useMemo(() => items.filter((n) => matches(n, filter)), [items, filter]);
   const groups = useMemo(() => groupByDay(visible), [visible]);
-  const todayCount = items.filter((n) => isToday(parseISO(n.CreatedAt))).length;
+  const todayCount = items.filter((n) => isToday(parseAppDate(n.CreatedAt))).length;
   const liveCount = items.filter((n) => n.Type.includes('START') && !n.IsRead).length;
 
   return (
@@ -176,7 +107,7 @@ export function NotificationsPage() {
                             </span>
                             <span className="mt-0.5 block text-sm text-navy-800/65">{n.Message}</span>
                             <span className="mt-1.5 block text-xs text-navy-800/40">
-                              {formatDistanceToNow(parseISO(n.CreatedAt), { addSuffix: true })}
+                              {formatDistanceToNow(parseAppDate(n.CreatedAt), { addSuffix: true })}
                               {href ? ' · Open booking' : ''}
                             </span>
                           </span>
@@ -243,4 +174,13 @@ export function NotificationsPage() {
       </div>
     </div>
   );
+}
+
+function TypeIcon({ type }: { type: string }) {
+  if (type.includes('CREATED')) return <CalendarPlus className="h-4 w-4" />;
+  if (type.includes('CANCEL') || type.includes('REJECT')) return <XCircle className="h-4 w-4" />;
+  if (type.includes('START')) return <Play className="h-4 w-4" />;
+  if (type.includes('COMPLETE')) return <Flag className="h-4 w-4" />;
+  if (type.includes('REMIND')) return <Clock3 className="h-4 w-4" />;
+  return <Bell className="h-4 w-4" />;
 }

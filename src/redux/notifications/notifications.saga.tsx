@@ -2,7 +2,6 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : notifications sagas
-
 import { takeLatest, put, all, call } from 'redux-saga/effects';
 import notificationsActionTypes from './notifications.types';
 import {
@@ -23,6 +22,7 @@ import {
 } from './notifications.action';
 import { invokeApi } from '../_common/saga.utils';
 
+/******* FETCH NOTIFICATIONS DETAILS *******/
 function* fetchNotificationsDetails({ payload }: any) {
 	yield* invokeApi(fetchNotificationsCall, payload, fetchNotificationsSuccess, fetchNotificationsFailure);
 }
@@ -39,6 +39,8 @@ function* onFetchNotificationsReset() {
 	yield takeLatest(notificationsActionTypes.FETCH_NOTIFICATIONS_RESPONSE_RESET_START, fetchNotificationsReset);
 }
 
+
+/******* READ NOTIFICATION DETAILS *******/
 function* readNotificationDetails({ payload }: any) {
 	yield* invokeApi(readNotificationCall, payload, readNotificationSuccess, readNotificationFailure);
 }
@@ -55,6 +57,7 @@ function* onReadNotificationReset() {
 	yield takeLatest(notificationsActionTypes.READ_NOTIFICATION_RESPONSE_RESET_START, readNotificationReset);
 }
 
+/******* READ ALL NOTIFICATIONS DETAILS *******/
 function* readAllNotificationsDetails({ payload }: any) {
 	yield* invokeApi(readAllNotificationsCall, payload, readAllNotificationsSuccess, readAllNotificationsFailure);
 }
@@ -71,6 +74,7 @@ function* onReadAllNotificationsReset() {
 	yield takeLatest(notificationsActionTypes.READ_ALL_NOTIFICATIONS_RESPONSE_RESET_START, readAllNotificationsReset);
 }
 
+/******* NOTIFICATIONS SAGA *******/
 export function* notificationsSaga() {
 	yield all([call(onFetchNotificationsStart), call(onFetchNotificationsReset), call(onReadNotificationStart), call(onReadNotificationReset), call(onReadAllNotificationsStart), call(onReadAllNotificationsReset)]);
 }

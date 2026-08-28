@@ -1,10 +1,9 @@
 // AUTHOR : NANDHAKUMAR S V
-// DATE : 27/08/2026
+// DATE : 28/08/2026
 // DESCRIPTION : Users page to view and manage users
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { UserPlus } from 'lucide-react';
 import { celebrate } from '../../components/ui/SuccessFx';
 import type { Paged } from '../../types/api';
@@ -29,43 +28,18 @@ import { selectRoles } from '../../redux/roles/roles.selector';
 import { fetchDepartmentsStart } from '../../redux/departments/departments.action';
 import { selectDepartments } from '../../redux/departments/departments.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
+import { UserRow, schema, FormData, initials } from '../../helpers/setting/userValidation';
 
-type UserRow = {
-  Id: string;
-  EmployeeId: string;
-  FirstName: string;
-  LastName: string;
-  Email: string;
-  DepartmentName: string | null;
-  Designation: string | null;
-  RoleName: string;
-  RoleId: string;
-  Status: string;
-};
-
-const schema = z.object({
-  employeeId: z.string().min(1, 'Required'),
-  firstName: z.string().min(1, 'Required'),
-  lastName: z.string().min(1, 'Required'),
-  email: z.string().email('Enter a valid email'),
-  phone: z.string().optional(),
-  departmentId: z.string().optional(),
-  designation: z.string().optional(),
-  roleId: z.string().min(1, 'Required'),
-  password: z.string().min(8, 'Min 8 characters'),
-});
-
-type FormData = z.infer<typeof schema>;
-
-function initials(first: string, last: string) {
-  return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
-}
 
 export function UsersPage() {
+
+  /******* STATE *******/
   const { can } = usePermission();
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectUsersPage) as Paged<UserRow> | null;
   const isLoading = useAppSelector(selectUsersLoading);
   const roles = useAppSelector(selectRoles) as { Id: string; Name: string }[] | undefined;
@@ -73,6 +47,7 @@ export function UsersPage() {
   const creating = useAppSelector(selectCreateUserLoading);
   const createResponse = useAppSelector(selectCreateUserResponse);
 
+  /******* FORM *******/
   const { register, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -88,6 +63,7 @@ export function UsersPage() {
     },
   });
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchUsersStart({ q, pageSize: 50 }));
   }, [q, dispatch]);
@@ -97,6 +73,7 @@ export function UsersPage() {
     dispatch(fetchDepartmentsStart());
   }, [dispatch]);
 
+  /******* HANDLERS *******/
   const resetCreate = useCallback(() => dispatch(createUserResponseResetStart()), [dispatch]);
   useReduxResponse(createResponse, resetCreate, () => {
     celebrate('User created', 'They can sign in with the password you set.');
@@ -105,6 +82,7 @@ export function UsersPage() {
     dispatch(fetchUsersStart({ q, pageSize: 50 }));
   });
 
+  /******* COLUMNS *******/
   const columns: Column<UserRow>[] = [
     {
       key: 'name',
@@ -123,7 +101,7 @@ export function UsersPage() {
         </div>
       ),
     },
-    { key: 'employee', header: 'Employee ID', render: (u) => u.EmployeeId },
+    { key: 'employee', header: 'Username', render: (u) => u.EmployeeId },
     { key: 'department', header: 'Department', render: (u) => u.DepartmentName ?? '—' },
     {
       key: 'role',
@@ -141,7 +119,7 @@ export function UsersPage() {
     <div>
       <PageHeader
         title="Users"
-        description="Accounts, roles, and access status."
+        description="Live directory from CLIENT_API_LIVE (SP_GET_USERS)."
         actions={
           can('users.manage') ? (
             <PrimaryButton type="button" onClick={() => setOpen(true)}>
@@ -152,7 +130,7 @@ export function UsersPage() {
         }
       />
       <Toolbar>
-        <SearchField value={q} onChange={setQ} placeholder="Search by name, email, or ID" />
+        <SearchField value={q} onChange={setQ} placeholder="Search by username or email" />
       </Toolbar>
       {isLoading ? (
         <Spinner />
@@ -208,3 +186,4 @@ export function UsersPage() {
     </div>
   );
 }
+export default UsersPage;

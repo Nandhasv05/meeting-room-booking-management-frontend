@@ -5,6 +5,7 @@
 
 import { makeApiCall } from '../_common/api.utils';
 
+/******* FETCH DASHBOARD CALL *******/
 export const fetchDashboardCall = (payload?: any) => {
 	return makeApiCall('/dashboard', payload);
 };

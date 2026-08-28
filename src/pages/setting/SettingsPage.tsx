@@ -1,4 +1,6 @@
-// AUTHOR : NANDHAKUMAR S V
+// AUTHOR : NANDHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Settings page to view and manage settings
 // DATE : 27/08/2026
 // DESCRIPTION : Settings page to view and manage settings
 import { useCallback, useEffect, useState } from 'react';
@@ -25,24 +27,28 @@ import {
   selectTestMailResponse,
 } from '../../redux/settings/settings.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-const MAIL_KEYS = ['smtp.host', 'smtp.port', 'smtp.user', 'smtp.password', 'smtp.from'] as const;
-const PASSWORD_UNCHANGED = '********';
+import { MAIL_KEYS, PASSWORD_UNCHANGED } from '../../helpers/setting/settingValidation';
 
 export function SettingsPage() {
+
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const [testTo, setTestTo] = useState('nandhakumarsv@gmail.com');
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectSettings) as { Key: string; Value: string; Description: string }[] | undefined;
   const isLoading = useAppSelector(selectSettingsLoading);
   const saving = useAppSelector(selectSaveSettingsLoading);
   const testing = useAppSelector(selectTestMailLoading);
   const saveResponse = useAppSelector(selectSaveSettingsResponse);
   const testResponse = useAppSelector(selectTestMailResponse);
-
+  
+  /******* FORM *******/
   const { register, handleSubmit, watch, setValue, reset, formState } = useForm<Record<string, string>>({
     defaultValues: {} as Record<string, string>,
   });
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchSettingsStart());
   }, [dispatch]);
@@ -52,6 +58,7 @@ export function SettingsPage() {
     reset(Object.fromEntries(data.map((s) => [s.Key, s.Value])));
   }, [data, reset]);
 
+  /******* HANDLERS *******/
   const resetSave = useCallback(() => dispatch(saveSettingsResponseResetStart()), [dispatch]);
   const resetTest = useCallback(() => dispatch(testMailResponseResetStart()), [dispatch]);
   useReduxResponse(saveResponse, resetSave, () => {
@@ -62,9 +69,11 @@ export function SettingsPage() {
     toast.success('Test mail sent. Check inbox and Junk.');
   });
 
+  /******* MEMO *******/
   const values = watch();
   const savedUser = String(data?.find((s) => s.Key === 'smtp.user')?.Value ?? '');
 
+  /******* RENDER *******/
   if (isLoading || !data) return <Spinner />;
   const other = data.filter((s) => !MAIL_KEYS.includes(s.Key as (typeof MAIL_KEYS)[number]));
   return (
@@ -209,3 +218,5 @@ export function SettingsPage() {
     </div>
   );
 }
+
+export default SettingsPage;

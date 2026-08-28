@@ -2,15 +2,16 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : calendar reducer
-
 import calendarActionTypes from './calendar.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'calendar': null,
 	'calendarLoading': false
 };
 
 const calendarReducer = (state = INITIAL_STATE, action: any) => {
+	/******* FETCH CALENDAR START *******/
 	switch (action.type) {
 		case calendarActionTypes.FETCH_CALENDAR_START:
 			return {
@@ -32,6 +33,7 @@ const calendarReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* FETCH CALENDAR RESPONSE RESET END *******/
 		default:
 			return state;
 	}

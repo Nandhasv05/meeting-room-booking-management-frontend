@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Hall detail page to view hall detail
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ExternalLink, Pencil } from 'lucide-react';
@@ -11,15 +14,24 @@ import { fetchHallStart } from '../../redux/halls/halls.action';
 import { selectHall, selectHallLoading } from '../../redux/halls/halls.selector';
 
 export function HallDetailPage() {
+
+  /******* STATE *******/
   const { id } = useParams();
   const { can } = usePermission();
   const dispatch = useAppDispatch();
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectHall) as Hall | null;
   const isLoading = useAppSelector(selectHallLoading);
+
+  /******* EFFECTS *******/
   useEffect(() => {
     if (id) dispatch(fetchHallStart({ id }));
   }, [id, dispatch]);
   if (isLoading || !data) return <Spinner />;
+
+
+  
   return (
     <div>
       <PageHeader
@@ -78,3 +90,4 @@ export function HallDetailPage() {
     </div>
   );
 }
+export default HallDetailPage;

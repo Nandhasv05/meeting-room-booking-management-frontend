@@ -15,6 +15,7 @@ import {
 } from './availability.action';
 import { invokeApi } from '../_common/saga.utils';
 
+/******* CHECK AVAILABILITY DETAILS START *******/
 function* checkAvailabilityDetails({ payload }: any) {
 	yield* invokeApi(checkAvailabilityCall, payload, checkAvailabilitySuccess, checkAvailabilityFailure);
 }
@@ -30,7 +31,9 @@ function* onCheckAvailabilityStart() {
 function* onCheckAvailabilityReset() {
 	yield takeLatest(availabilityActionTypes.CHECK_AVAILABILITY_RESPONSE_RESET_START, checkAvailabilityReset);
 }
+/******* CHECK AVAILABILITY DETAILS END *******/
 
+/******* AVAILABILITY SAGA *******/
 export function* availabilitySaga() {
 	yield all([call(onCheckAvailabilityStart), call(onCheckAvailabilityReset)]);
 }

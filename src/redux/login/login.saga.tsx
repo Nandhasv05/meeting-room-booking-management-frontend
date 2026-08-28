@@ -14,6 +14,7 @@ import {
 } from './login.action';
 import { invokeApi } from '../_common/saga.utils';
 
+/******* SIGN IN WITH CREDENTIALS *******/
 export function* signInWithCredentials({ payload }: any) {
 	yield* invokeApi(userSignIn, payload, userSignInSuccess, userSignInFailure);
 }
@@ -30,11 +31,13 @@ export function* onPhoneSignInReset() {
 	yield takeLatest(loginActionTypes.USER_SIGN_IN_RESPONSE_RESET_START, makeUserLoginReset);
 }
 
+
 export function* makeUserSignInLogout() {
 	try {
 		yield call(userSignOut);
 	} catch {
 		/* still clear local session */
+		console.error('Error in user sign out');
 	}
 	yield put(userSignInLogOut());
 }
@@ -43,6 +46,8 @@ export function* userSignInLogout() {
 	yield takeLatest(loginActionTypes.USER_SIGN_OUT_START, makeUserSignInLogout);
 }
 
+
+/******* LOGIN SAGA *******/
 export function* loginSaga() {
 	yield all([call(onUserSignInStart), call(userSignInLogout), call(onPhoneSignInReset)]);
 }

@@ -2,9 +2,9 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : notifications reducer
-
 import notificationsActionTypes from './notifications.types';
 
+/******* INITIAL STATE *******/
 const INITIAL_STATE: any = {
 	'notifications': null,
 	'notificationsLoading': false,
@@ -16,6 +16,7 @@ const INITIAL_STATE: any = {
 
 const notificationsReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
+		/******* FETCH NOTIFICATIONS START *******/
 		case notificationsActionTypes.FETCH_NOTIFICATIONS_START:
 			return {
 				...state,
@@ -36,6 +37,7 @@ const notificationsReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 			};
+		/******* READ NOTIFICATION START *******/
 		case notificationsActionTypes.READ_NOTIFICATION_START:
 			return {
 				...state,
@@ -58,6 +60,7 @@ const notificationsReducer = (state = INITIAL_STATE, action: any) => {
 				...state,
 				readNotificationResponse: null,
 			};
+		/******* READ ALL NOTIFICATIONS START *******/
 		case notificationsActionTypes.READ_ALL_NOTIFICATIONS_START:
 			return {
 				...state,

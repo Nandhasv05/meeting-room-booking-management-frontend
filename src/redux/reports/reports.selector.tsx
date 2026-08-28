@@ -7,5 +7,7 @@ import { createSelector } from 'reselect';
 
 const selectSlice = (state: any) => state.reports;
 
+/******* SELECT ROWS *******/
 export const selectRows = createSelector([selectSlice], (slice) => slice.rows);
+/******* SELECT REPORT LOADING *******/
 export const selectReportLoading = createSelector([selectSlice], (slice) => slice.reportLoading);

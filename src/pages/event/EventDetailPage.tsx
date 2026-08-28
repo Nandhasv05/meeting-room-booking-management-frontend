@@ -1,8 +1,10 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Event detail page to view event detail
 import { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { celebrate } from '../../components/ui/SuccessFx';
 import { PageHeader, Spinner } from '../../components/ui/Feedback';
 import { Field as Labeled, inputClass, PrimaryButton } from '../../components/ui/Form';
@@ -21,50 +23,32 @@ import {
   selectUpdateEventResponse,
 } from '../../redux/events/events.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-type EventDetail = {
-  Id: string;
-  BookingId: string;
-  EventName: string;
-  EventType: string;
-  Description: string | null;
-  ExpectedAttendees: number;
-  ActualAttendees: number | null;
-  Requirements: string | null;
-  HallName: string;
-  OrganizerName: string;
-  Contact: string | null;
-  StartAt: string;
-  EndAt: string;
-  Purpose: string | null;
-};
-
-const schema = z.object({
-  description: z.string().optional(),
-  expectedAttendees: z.coerce.number(),
-  actualAttendees: z.coerce.number(),
-  requirements: z.string().optional(),
-});
-
-type FormData = z.infer<typeof schema>;
+import { EventDetail, schema, FormData, FormInput } from '../../helpers/event/eventValidation';
 
 export function EventDetailPage() {
+  /******* STATE *******/
   const { id } = useParams();
   const dispatch = useAppDispatch();
+
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectEvent) as EventDetail | null;
   const isLoading = useAppSelector(selectEventLoading);
   const saving = useAppSelector(selectUpdateEventLoading);
   const saveResponse = useAppSelector(selectUpdateEventResponse);
 
-  const { register, handleSubmit, reset } = useForm<FormData>({
+  /******* FORM *******/
+  const { register, handleSubmit, reset } = useForm<FormInput, unknown, FormData>({
     resolver: zodResolver(schema),
     defaultValues: { description: '', expectedAttendees: 0, actualAttendees: 0, requirements: '' },
   });
 
+  /******* EFFECTS *******/
   useEffect(() => {
     if (id) dispatch(fetchEventStart({ id }));
   }, [id, dispatch]);
 
+  /******* EFFECTS *******/
   useEffect(() => {
     if (!data) return;
     reset({
@@ -75,12 +59,14 @@ export function EventDetailPage() {
     });
   }, [data, reset]);
 
+  /******* HANDLERS *******/
   const resetSave = useCallback(() => dispatch(updateEventResponseResetStart()), [dispatch]);
   useReduxResponse(saveResponse, resetSave, () => {
     celebrate('Event updated');
     if (id) dispatch(fetchEventStart({ id }));
   });
 
+  /******* RENDER *******/
   if (isLoading || !data) return <Spinner />;
   return (
     <div className="max-w-3xl">

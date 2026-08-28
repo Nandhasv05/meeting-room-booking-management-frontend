@@ -15,6 +15,7 @@ import {
 } from './dashboard.action';
 import { invokeApi } from '../_common/saga.utils';
 
+/******* FETCH DASHBOARD DETAILS START *******/
 function* fetchDashboardDetails({ payload }: any) {
 	yield* invokeApi(fetchDashboardCall, payload, fetchDashboardSuccess, fetchDashboardFailure);
 }
@@ -31,6 +32,7 @@ function* onFetchDashboardReset() {
 	yield takeLatest(dashboardActionTypes.FETCH_DASHBOARD_RESPONSE_RESET_START, fetchDashboardReset);
 }
 
+/******* DASHBOARD SAGA *******/
 export function* dashboardSaga() {
 	yield all([call(onFetchDashboardStart), call(onFetchDashboardReset)]);
 }

@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Admin dashboard to view admin dashboard
 import { Link } from 'react-router-dom';
 import {
   Area,
@@ -13,6 +16,7 @@ import { StatusBadge } from '../../components/ui/Feedback';
 import { PulseStat, type Dash } from './shared';
 
 export function AdminDashboard({ data }: { data: Dash }) {
+  /******* STATE *******/
   const s = data.stats;
   const maxDept = Math.max(...data.byDepartment.map((d) => Number(d.Count) || 0), 1);
   const maxRole = Math.max(...data.usersByRole.map((r) => Number(r.Count) || 0), 1);

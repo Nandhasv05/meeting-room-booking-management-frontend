@@ -5,6 +5,7 @@
 
 import maintenanceActionTypes from './maintenance.types';
 
+/******* FETCH MAINTENANCE START *******/
 export const fetchMaintenanceStart = (payload?: any) => ({
 	type: maintenanceActionTypes.FETCH_MAINTENANCE_START,
 	payload,
@@ -28,6 +29,7 @@ export const fetchMaintenanceResponseChanged = () => ({
 	type: maintenanceActionTypes.FETCH_MAINTENANCE_RESPONSE_CHANGED,
 });
 
+/******* CREATE MAINTENANCE START *******/
 export const createMaintenanceStart = (payload?: any) => ({
 	type: maintenanceActionTypes.CREATE_MAINTENANCE_START,
 	payload,

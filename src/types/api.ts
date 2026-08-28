@@ -88,6 +88,7 @@ export type DisplayPayload = {
   availableFrom: string | null;
   current: Booking | null;
   next: Booking | null;
+  serverNow?: string;
 };
 
 export const EVENT_TYPES = [

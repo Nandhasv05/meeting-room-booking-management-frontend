@@ -2,9 +2,9 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : calendar action functions
-
 import calendarActionTypes from './calendar.types';
 
+/******* FETCH CALENDAR START *******/
 export const fetchCalendarStart = (payload?: any) => ({
 	type: calendarActionTypes.FETCH_CALENDAR_START,
 	payload,
@@ -27,3 +27,4 @@ export const fetchCalendarResponseResetStart = () => ({
 export const fetchCalendarResponseChanged = () => ({
 	type: calendarActionTypes.FETCH_CALENDAR_RESPONSE_CHANGED,
 });
+/******* FETCH CALENDAR RESPONSE RESET END *******/

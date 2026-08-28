@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Halls page to view halls
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Plus, Users } from 'lucide-react';
@@ -12,15 +15,23 @@ import { fetchHallsStart } from '../../redux/halls/halls.action';
 import { selectHalls, selectHallsLoading } from '../../redux/halls/halls.selector';
 
 export function HallsPage() {
+
+  /******* STATE *******/
   const { can } = usePermission();
   const [q, setQ] = useState('');
   const dispatch = useAppDispatch();
+
+  /******* SELECTORS *******/
   const data = useAppSelector(selectHalls) as Hall[] | undefined;
   const isLoading = useAppSelector(selectHallsLoading);
+
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchHallsStart({ q }));
   }, [q, dispatch]);
   useRealtime(['dashboard'], () => dispatch(fetchHallsStart({ q })));
+
+  
   return (
     <div>
       {/* TOOLBAR FOR THE HALLS PAGE */}
@@ -82,3 +93,4 @@ export function HallsPage() {
     </div>
   );
 }
+export default HallsPage;

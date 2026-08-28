@@ -1,66 +1,55 @@
-import { useEffect, useMemo, useState } from 'react';
+// AUTHOR : NANDNHAKUMAR SV
+// DATE : 28/08/2026
+// DESCRIPTION : Display page to view display
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Briefcase, CalendarClock, Maximize2, Minimize2, User, Users } from 'lucide-react';
 import type { DisplayPayload } from '../../types/api';
 import { useRealtime } from '../../hooks/useRealtime';
+import { useFullscreen } from '../../hooks/useFullscreen';
 import { fmtTime } from '../../utils/format';
 import { BrandLogo } from '../../components/brand/BrandLogo';
 import { LogoSpinner } from '../../components/brand/LogoSpinner';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchDisplayStart } from '../../redux/display/display.action';
 import { selectBoard } from '../../redux/display/display.selector';
+import {
+  clockParts,
+  haloWord,
+  progress,
+  remaining,
+  skins,
+  useNow,
+} from '../../helpers/display/displayValidation';
 
-const skins: Record<DisplayPayload['state'], string> = {
-  AVAILABLE: 'display-board--free',
-  UPCOMING: 'display-board--soon',
-  ONGOING: 'display-board--live',
-  MAINTENANCE: 'display-board--down',
+const CHIP: Record<DisplayPayload['state'], string> = {
+  AVAILABLE: 'Free now',
+  UPCOMING: 'Starting soon',
+  ONGOING: 'In progress',
+  MAINTENANCE: 'Unavailable',
 };
 
-function useNow() {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  return now;
-}
-
-function pad(n: number) {
-  return String(n).padStart(2, '0');
-}
-
-function clockParts(d: Date) {
-  const h = d.getHours();
-  const suffix = h >= 12 ? 'PM' : 'AM';
-  const hour = h % 12 === 0 ? 12 : h % 12;
-  return {
-    time: `${pad(hour)}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`,
-    suffix,
-    date: d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
-  };
-}
-
-function remaining(target: Date, now: Date) {
-  const ms = target.getTime() - now.getTime();
-  if (ms <= 0) return { label: '00:00:00', overdue: true };
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return { label: `${pad(h)}:${pad(m)}:${pad(s % 60)}`, overdue: false };
-}
-
-function progress(startIso: string, endIso: string, now: Date) {
-  const start = new Date(startIso).getTime();
-  const end = new Date(endIso).getTime();
-  if (end <= start) return 0;
-  return Math.min(100, Math.max(0, ((now.getTime() - start) / (end - start)) * 100));
-}
+const COUNT_HINT: Record<DisplayPayload['state'], string> = {
+  AVAILABLE: 'Open now',
+  UPCOMING: 'Starts in',
+  ONGOING: 'Ends in',
+  MAINTENANCE: 'Offline',
+};
 
 export function DisplayPage() {
+  /******* USE PARAMS *******/
   const { hallCode } = useParams();
-  const now = useNow();
+  const boardRef = useRef<HTMLDivElement>(null);
+  const { active: isFullscreen, enter, exit, toggle } = useFullscreen(boardRef);
+  const [showGate, setShowGate] = useState(true);
+  const [fsError, setFsError] = useState(false);
+
+  /******* SELECTORS *******/
   const dispatch = useAppDispatch();
   const data = useAppSelector(selectBoard) as DisplayPayload | null;
+  const now = useNow(data?.serverNow);
+
+  /******* EFFECTS *******/
   useRealtime([`hall:${hallCode}`], () => {
     if (hallCode) dispatch(fetchDisplayStart({ hallCode }));
   });
@@ -71,183 +60,255 @@ export function DisplayPage() {
     return () => window.clearInterval(id);
   }, [hallCode, dispatch]);
 
+  useEffect(() => {
+    if (isFullscreen) {
+      setShowGate(false);
+      setFsError(false);
+    }
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        void toggle();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [toggle]);
+
+  const goFullscreen = async () => {
+    try {
+      await enter();
+    } catch {
+      setFsError(true);
+    }
+  };
+
   if (!data) {
     return (
-      <div className="grid min-h-[100dvh] place-items-center bg-navy-950">
-        <LogoSpinner label="Connecting…" size="lg" light />
+      <div ref={boardRef} className={`display-board ${isFullscreen ? 'is-fullscreen' : ''}`}>
+        <div className="grid min-h-[100dvh] place-items-center">
+          <LogoSpinner label="Connecting…" size="lg" light />
+        </div>
+        {!isFullscreen && showGate ? (
+          <FullscreenGate error={fsError} onEnter={() => void goFullscreen()} onSkip={() => setShowGate(false)} />
+        ) : null}
       </div>
     );
   }
 
+  /******* RENDER *******/
   const booking = data.current ?? data.next;
   const clock = clockParts(now);
   const endAt = data.current ? new Date(data.current.EndAt) : null;
   const startAt = data.next && data.state !== 'ONGOING' ? new Date(data.next.StartAt) : null;
   const count = data.state === 'ONGOING' && endAt ? remaining(endAt, now) : startAt ? remaining(startAt, now) : null;
   const bar = data.current && data.state === 'ONGOING' ? progress(data.current.StartAt, data.current.EndAt, now) : 0;
+  const showDock = Boolean(booking && data.state !== 'MAINTENANCE');
 
   return (
-    <div className={`display-board ${skins[data.state]}`}>
-      <div className="display-board__grid" />
-      <span className="display-board__orb display-board__orb--a" />
-      <span className="display-board__orb display-board__orb--b" />
-      <span className="display-board__scan" />
+    <div ref={boardRef} className={`display-board ${skins[data.state]} ${isFullscreen ? 'is-fullscreen' : ''}`}>
+      <div className="stage-mesh" />
+      <span className="stage-sweep" />
+      <span className="stage-hud stage-hud--tl" />
+      <span className="stage-hud stage-hud--tr" />
+      <span className="stage-hud stage-hud--bl" />
+      <span className="stage-hud stage-hud--br" />
 
-      <div className="relative z-10 flex min-h-[100dvh] flex-col px-6 py-6 sm:px-10 md:px-14 md:py-8">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div className="animate-rise">
-            <BrandLogo variant="light" height={30} to={null} />
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">{data.hallCode}</p>
+      <div className="stage-frame">
+        <header className="stage-top">
+          <div className="stage-brand">
+            <BrandLogo variant="light" height={28} to={null} />
+            <p>{data.hallCode}</p>
           </div>
-          <div className="text-right animate-rise" style={{ animationDelay: '80ms' }}>
-            <p className="font-display text-3xl font-bold tabular-nums tracking-tight sm:text-4xl md:text-5xl">
-              {clock.time}
-              <span className="ml-2 align-top text-sm font-semibold tracking-[0.2em] text-white/55 sm:text-base">
-                {clock.suffix}
-              </span>
+          <div className="stage-tape" aria-hidden>
+            <div className="stage-tape__track">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <span key={i}>
+                  {CHIP[data.state]} · {data.hallName}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="stage-clock">
+            <p className="stage-clock__time">
+              {clock.hh}:{clock.mm}
+              <span>:{clock.ss}</span>
+              <em>{clock.suffix}</em>
             </p>
-            <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45 sm:text-sm">{clock.date}</p>
+            <p className="stage-clock__date">{clock.date}</p>
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col justify-center gap-8 py-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-          <div key={`${data.state}-${data.headline}`} className="min-w-0 flex-1 display-enter">
-            <StatusChip state={data.state} />
-            <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-              {data.hallName}
-            </h1>
-            <p className="mt-3 font-display text-sm uppercase tracking-[0.28em] text-white/60 sm:text-lg md:text-xl">
-              {data.subtitle}
-            </p>
-            <p className="mt-3 max-w-4xl font-display text-2xl font-semibold leading-tight sm:text-4xl md:text-5xl">
-              {data.headline}
-            </p>
-
+        <main key={`${data.state}-${data.headline}`} className="stage-hero">
+          <div className="stage-hero__status">
+            <span className={`stage-pill ${data.state === 'ONGOING' ? 'is-live' : ''}`}>
+              <span className="display-chip__dot" />
+              {CHIP[data.state]}
+            </span>
+            <KineticWord word={haloWord[data.state]} />
+            <p className="stage-hero__hint">{COUNT_HINT[data.state]}</p>
             {count ? (
-              <div className="mt-8 inline-flex items-end gap-4 rounded-2xl border border-white/15 bg-white/8 px-5 py-4 backdrop-blur-sm">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">
-                    {data.state === 'ONGOING' ? 'Ends in' : 'Starts in'}
-                  </p>
-                  <p className="mt-1 font-display text-4xl font-bold tabular-nums tracking-tight sm:text-5xl">
-                    {count.label}
-                  </p>
-                </div>
+              <div className="stage-count">
+                <CountBlock value={count.h || '0'} label="Hrs" />
+                <span className="stage-count__sep">:</span>
+                <CountBlock value={count.m || '0'} label="Min" />
+                <span className="stage-count__sep">:</span>
+                <CountBlock value={count.s || '0'} label="Sec" />
               </div>
-            ) : null}
-
-            {data.state === 'ONGOING' && data.current ? (
-              <div className="mt-6 max-w-xl">
-                <div className="display-progress">
-                  <span style={{ width: `${bar}%` }} />
-                </div>
-                <p className="mt-2 text-sm text-white/55">
-                  {fmtTime(data.current.StartAt)} – {fmtTime(data.current.EndAt)}
-                </p>
-              </div>
-            ) : null}
-
-            {data.state === 'AVAILABLE' && data.next ? (
-              <p className="mt-6 text-lg text-white/70 sm:text-xl">
-                Next: {data.next.EventName} · {fmtTime(data.next.StartAt)}
-              </p>
-            ) : null}
-
-            {data.state === 'MAINTENANCE' && data.availableFrom ? (
-              <p className="mt-6 text-lg text-white/75 sm:text-2xl">Back at {fmtTime(data.availableFrom)}</p>
-            ) : null}
+            ) : (
+              <p className="stage-hero__idle">{data.subtitle}</p>
+            )}
           </div>
 
-          {booking && data.state !== 'MAINTENANCE' ? (
-            <aside className="w-full max-w-md shrink-0 display-enter" style={{ animationDelay: '120ms' }}>
-              <EventCard
-                label={data.state === 'ONGOING' ? 'Now in this room' : 'Next in this room'}
-                name={booking.EventName}
-                start={booking.StartAt}
-                end={booking.EndAt}
-                organizer={booking.OrganizerName}
-                department={booking.DepartmentName}
-                guests={booking.AttendeeCount}
-                live={data.state === 'ONGOING'}
-              />
-            </aside>
-          ) : null}
+          <div className="stage-hero__copy">
+            <p className="stage-kicker">Hall</p>
+            <h1 className="stage-title">{data.hallName}</h1>
+            <p className="stage-headline">{data.headline}</p>
+            {data.state === 'ONGOING' && data.current ? (
+              <p className="stage-when">
+                <CalendarClock className="h-5 w-5" />
+                {fmtTime(data.current.StartAt)} – {fmtTime(data.current.EndAt)}
+              </p>
+            ) : null}
+            {data.state === 'AVAILABLE' && data.next ? (
+              <p className="stage-when">
+                Next · {data.next.EventName} · {fmtTime(data.next.StartAt)}
+              </p>
+            ) : null}
+            {data.state === 'MAINTENANCE' && data.availableFrom ? (
+              <p className="stage-when">Back at {fmtTime(data.availableFrom)}</p>
+            ) : null}
+          </div>
         </main>
 
-        <footer className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/30">
+        {showDock && booking ? (
+          <section className="stage-dock">
+            {data.state === 'ONGOING' ? (
+              <div className="stage-marquee" aria-hidden>
+                <div className="stage-marquee__track">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>Do not disturb</span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className="stage-dock__grid">
+              <div className="stage-dock__event">
+                <p className="stage-kicker">{data.state === 'ONGOING' ? 'Now in this room' : 'Next in this room'}</p>
+                <p className="stage-dock__name">{booking.EventName}</p>
+                <p className="stage-when">
+                  <CalendarClock className="h-4 w-4" />
+                  {fmtTime(booking.StartAt)} – {fmtTime(booking.EndAt)}
+                </p>
+              </div>
+              <div className="stage-tiles">
+                <article className="stage-tile">
+                  <User className="h-4 w-4 opacity-50" />
+                  <p>Organizer</p>
+                  <strong>{booking.OrganizerName || '—'}</strong>
+                </article>
+                <article className="stage-tile">
+                  <Briefcase className="h-4 w-4 opacity-50" />
+                  <p>Department</p>
+                  <strong>{booking.DepartmentName || '—'}</strong>
+                </article>
+                <article className="stage-tile">
+                  <Users className="h-4 w-4 opacity-50" />
+                  <p>Guests</p>
+                  <strong>{booking.AttendeeCount}</strong>
+                </article>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {data.state === 'ONGOING' ? (
+          <div className="stage-progress" aria-hidden>
+            <span style={{ width: `${bar}%` }} />
+          </div>
+        ) : null}
+
+        <footer className="stage-foot">
           <span>Live display</span>
+          <span className="stage-foot__bar" aria-hidden>
+            <span />
+          </span>
           <span className="hidden sm:inline">Auto-refresh · do not power off</span>
+          {isFullscreen ? (
+            <button type="button" className="display-fs-exit" onClick={() => void exit()} title="Exit fullscreen (Esc)">
+              <Minimize2 className="h-3.5 w-3.5" />
+              Exit
+            </button>
+          ) : null}
         </footer>
+      </div>
+
+      {!isFullscreen && showGate ? (
+        <FullscreenGate error={fsError} onEnter={() => void goFullscreen()} onSkip={() => setShowGate(false)} />
+      ) : null}
+
+      {!isFullscreen && !showGate ? (
+        <button type="button" className="display-fs-fab" onClick={() => void goFullscreen()} title="Enter fullscreen (F)">
+          <Maximize2 className="h-5 w-5" />
+          <span>Fullscreen</span>
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/******* FULLSCREEN GATE *******/
+function FullscreenGate({
+  error,
+  onEnter,
+  onSkip,
+}: {
+  error: boolean;
+  onEnter: () => void;
+  onSkip: () => void;
+}) {
+  return (
+    <div className="display-fs-gate">
+      <div className="display-fs-gate__panel">
+        <button type="button" className="display-fs-gate__go" onClick={onEnter}>
+          <Maximize2 className="h-5 w-5" />
+          Enter fullscreen
+        </button>
+        <p className="display-fs-gate__hint">
+          {error
+            ? 'Allow fullscreen, or press F11 to hide the browser header.'
+            : 'Hides the browser address bar for this TV.'}
+        </p>
+        <button type="button" className="display-fs-gate__skip" onClick={onSkip}>
+          Stay in window
+        </button>
       </div>
     </div>
   );
 }
 
-function StatusChip({ state }: { state: DisplayPayload['state'] }) {
-  const copy = useMemo(
-    () =>
-      ({
-        AVAILABLE: 'Free now',
-        UPCOMING: 'Starting soon',
-        ONGOING: 'In progress',
-        MAINTENANCE: 'Unavailable',
-      })[state],
-    [state],
-  );
+function KineticWord({ word }: { word: string }) {
   return (
-    <span className={`display-chip ${state === 'ONGOING' ? 'display-chip--live' : ''}`}>
-      <span className="display-chip__dot" />
-      {copy}
-    </span>
+    <p className="stage-word">
+      {word.split('').map((ch, i) => (
+        <span key={`${word}-${ch}-${i}`} style={{ animationDelay: `${i * 70}ms` }}>
+          {ch}
+        </span>
+      ))}
+    </p>
   );
 }
 
-function EventCard({
-  label,
-  name,
-  start,
-  end,
-  organizer,
-  department,
-  guests,
-  live,
-}: {
-  label: string;
-  name: string;
-  start: string;
-  end: string;
-  organizer: string;
-  department: string;
-  guests: number;
-  live: boolean;
-}) {
+function CountBlock({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-3xl border border-white/15 bg-white/10 p-6 shadow-lift backdrop-blur-md">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">{label}</p>
-      <p className="mt-2 font-display text-2xl font-semibold leading-snug sm:text-3xl">{name}</p>
-      <p className="mt-3 text-lg text-white/80">
-        {fmtTime(start)} – {fmtTime(end)}
-      </p>
-      <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Organizer</dt>
-          <dd className="mt-1 truncate text-white/90">{organizer || '—'}</dd>
-        </div>
-        <div>
-          <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Department</dt>
-          <dd className="mt-1 truncate text-white/90">{department || '—'}</dd>
-        </div>
-        <div className="col-span-2">
-          <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Expected guests</dt>
-          <dd className="mt-1 text-white/90">{guests}</dd>
-        </div>
-      </dl>
-      {live ? (
-        <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em]">
-          <span className="display-chip__dot" />
-          Do not disturb
-        </p>
-      ) : null}
+    <div className="stage-count__block">
+      <span key={value} className="stage-count__num">
+        {value}
+      </span>
+      <span className="stage-count__label">{label}</span>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 // AUTHOR : NANDHAKUMAR S V
-//VERSION : 1.0.0
-//DESCRIPTION : Booking calendar with an Outlook-style toolbar
-// DATE : 2026-08-26
+// DATE : 27/08/2026
+// DESCRIPTION : Booking calendar with an Outlook-style toolbar
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
@@ -11,15 +10,11 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import {
   CalendarDays,
-  CalendarRange,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Columns3,
   Filter,
-  Grid3x3,
-  ListChecks,
   MoveRight,
   Plus,
   Square,
@@ -33,39 +28,11 @@ import { fetchHallsStart } from '../../redux/halls/halls.action';
 import { selectHalls } from '../../redux/halls/halls.selector';
 import { fetchCalendarStart } from '../../redux/calendar/calendar.action';
 import { selectCalendar, selectCalendarLoading } from '../../redux/calendar/calendar.selector';
+import { colors, ViewOption, VIEWS, barButton, CalendarCall } from '../../helpers/calendar/calendarValidation';
 
-const colors: Record<string, string> = {
-  PENDING: '#b45309',
-  CONFIRMED: '#1A3322',
-  APPROVED: '#2F7A4E',
-  ONGOING: '#3D7A55',
-  CANCELLED: '#9f1239',
-  MAINTENANCE: '#475569',
-  COMPLETED: '#64748b',
-};
-
-type Cal = { Id: string; EventName: string; StartAt: string; EndAt: string; Status: string; HallCode: string };
-
-type ViewOption = {
-  id: string;
-  label: string;
-  view: string;
-  hiddenDays: number[];
-  icon: typeof CalendarDays;
-};
-
-const VIEWS: ViewOption[] = [
-  { id: 'day', label: 'Day', view: 'timeGridDay', hiddenDays: [], icon: Square },
-  { id: 'workWeek', label: 'Work week', view: 'timeGridWeek', hiddenDays: [0, 6], icon: Columns3 },
-  { id: 'week', label: 'Week', view: 'timeGridWeek', hiddenDays: [], icon: CalendarRange },
-  { id: 'month', label: 'Month', view: 'dayGridMonth', hiddenDays: [], icon: Grid3x3 },
-  { id: 'agenda', label: 'Agenda', view: 'listWeek', hiddenDays: [], icon: ListChecks },
-];
-
-const barButton =
-  'inline-flex items-center gap-1.5 rounded-lg border border-transparent px-2.5 py-1.5 text-sm font-medium text-navy-800 transition hover:border-navy-800/10 hover:bg-white';
 
 export function CalendarPage() {
+  /******* STATE *******/
   const navigate = useNavigate();
   const { can } = usePermission();
   const dispatch = useAppDispatch();
@@ -75,28 +42,38 @@ export function CalendarPage() {
   const [title, setTitle] = useState('');
   const [viewId, setViewId] = useState('workWeek');
   const [menu, setMenu] = useState<'view' | 'filter' | null>(null);
+
+  /******* EFFECTS *******/
   useRealtime(['calendar'], () => {
     if (range.from && range.to) {
       dispatch(fetchCalendarStart({ from: range.from, to: range.to, hallId: hallId || undefined }));
     }
   });
 
+  /******* SELECTORS *******/
   const active = VIEWS.find((v) => v.id === viewId) ?? VIEWS[1]!;
   const getCal = () => calRef.current?.getApi();
 
+  /******* SELECTORS *******/
   const halls = useAppSelector(selectHalls) as Hall[] | undefined;
-  const data = useAppSelector(selectCalendar) as { bookings: Cal[]; maintenance: Cal[] } | null;
+  const data = useAppSelector(selectCalendar) as { bookings: CalendarCall[]; maintenance: CalendarCall[] } | null;
   const isLoading = useAppSelector(selectCalendarLoading);
 
+  /******* EFFECTS *******/
   useEffect(() => {
+    /******* FETCH HALLS START *******/
     dispatch(fetchHallsStart());
   }, [dispatch]);
 
+  /******* EFFECTS *******/
   useEffect(() => {
+    /******* FETCH CALENDAR START *******/
     if (!range.from || !range.to) return;
     dispatch(fetchCalendarStart({ from: range.from, to: range.to, hallId: hallId || undefined }));
   }, [range.from, range.to, hallId, dispatch]);
 
+
+  /******* EVENTS *******/
   const events = [...(data?.bookings ?? []), ...(data?.maintenance ?? [])].map((e) => ({
     id: e.Id,
     title: `${e.EventName} · ${e.HallCode}`,
@@ -109,6 +86,7 @@ export function CalendarPage() {
 
   const selectedHall = halls?.find((h) => h.Id === hallId);
 
+  /******* APPLY VIEW *******/
   const applyView = (option: ViewOption) => {
     setViewId(option.id);
     setMenu(null);
@@ -231,7 +209,7 @@ export function CalendarPage() {
               setRange((prev) => (prev.from === from && prev.to === to ? prev : { from, to }));
             }}
             eventClick={(info) => {
-              const status = (info.event.extendedProps as Cal).Status;
+              const status = (info.event.extendedProps as CalendarCall).Status;
               if (status !== 'MAINTENANCE') navigate(`/bookings/${info.event.id}`);
             }}
             select={(sel) => {
@@ -259,6 +237,7 @@ export function CalendarPage() {
   );
 }
 
+// DROPDOWN COMPONENT
 function Dropdown({
   open,
   onToggle,
@@ -292,6 +271,7 @@ function Dropdown({
   );
 }
 
+// MENU ROW COMPONENT
 function MenuRow({
   icon: Icon,
   label,

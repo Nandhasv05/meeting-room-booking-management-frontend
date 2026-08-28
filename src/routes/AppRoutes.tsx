@@ -23,6 +23,7 @@ import { AuditPage } from '../pages/audit/AuditPage';
 import { MaintenancePage } from '../pages/setting/MaintenancePage';
 import { FacilitiesPage } from '../pages/hall/FacilitiesPage';
 import { NotificationsPage } from '../pages/setting/NotificationsPage';
+import { NotFoundPage } from '../pages/error/NotFoundPage';
 import { isOpsDashboardRole } from '../utils/roles';
 import { useAppSelector } from '../store';
 
@@ -63,7 +64,7 @@ export function AppRoutes() {
         <Route path="/Admin/audit" element={<AuditPage />} />
         <Route path="/Admin/maintenance" element={<MaintenancePage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

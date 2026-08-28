@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 28/08/2026
+// DESCRIPTION : Roles page to view roles
 import { useCallback, useEffect, useState } from 'react';
 import { celebrate } from '../../components/ui/SuccessFx';
 import { EmptyState, PageHeader, Spinner } from '../../components/ui/Feedback';
@@ -18,19 +21,24 @@ import {
   selectSaveRoleResponse,
 } from '../../redux/roles/roles.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-type Role = { Id: string; Code: string; Name: string; Description: string; UserCount: number };
-type Perm = { Id: string; Code: string; Name: string; Module: string };
+import { Role, Perm } from '../../helpers/role/roleValidation';
 
 export function RolesPage() {
+
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const [selected, setSelected] = useState<string | null>(null);
+
+  /******* SELECTORS *******/
   const roles = useAppSelector(selectRoles) as Role[] | undefined;
   const isLoading = useAppSelector(selectRolesLoading);
   const allPerms = useAppSelector(selectPermissions) as Perm[] | undefined;
   const detail = useAppSelector(selectRoleDetail) as (Role & { permissions: Perm[] }) | null;
+
+  /******* STATE *******/
   const saveResponse = useAppSelector(selectSaveRoleResponse);
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchRolesStart());
     dispatch(fetchPermissionsStart());
@@ -40,6 +48,7 @@ export function RolesPage() {
     if (selected) dispatch(fetchRoleDetailStart({ id: selected }));
   }, [selected, dispatch]);
 
+  /******* HANDLERS *******/
   const resetSave = useCallback(() => dispatch(saveRolePermissionsResponseResetStart()), [dispatch]);
   useReduxResponse(saveResponse, resetSave, () => {
     celebrate('Permissions saved');
@@ -127,3 +136,4 @@ export function RolesPage() {
     </div>
   );
 }
+export default RolesPage;

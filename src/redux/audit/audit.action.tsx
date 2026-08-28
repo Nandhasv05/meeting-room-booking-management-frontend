@@ -5,6 +5,7 @@
 
 import auditActionTypes from './audit.types';
 
+/******* FETCH AUDIT LOGS START *******/
 export const fetchAuditLogsStart = (payload?: any) => ({
 	type: auditActionTypes.FETCH_AUDIT_LOGS_START,
 	payload,
@@ -27,3 +28,4 @@ export const fetchAuditLogsResponseResetStart = () => ({
 export const fetchAuditLogsResponseChanged = () => ({
 	type: auditActionTypes.FETCH_AUDIT_LOGS_RESPONSE_CHANGED,
 });
+/******* FETCH AUDIT LOGS RESPONSE RESET END *******/

@@ -2,9 +2,9 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : reports action functions
-
 import reportsActionTypes from './reports.types';
 
+/******* FETCH REPORT START *******/
 export const fetchReportStart = (payload?: any) => ({
 	type: reportsActionTypes.FETCH_REPORT_START,
 	payload,

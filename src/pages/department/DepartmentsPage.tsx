@@ -1,7 +1,9 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Departments page to view departments
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { celebrate } from '../../components/ui/SuccessFx';
 import { EmptyState, PageHeader, Spinner, StatusBadge } from '../../components/ui/Feedback';
 import { Field as Labeled, inputClass, PrimaryButton } from '../../components/ui/Form';
@@ -19,33 +21,28 @@ import {
   selectDepartmentsLoading,
 } from '../../redux/departments/departments.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-
-type Department = { Id: string; Code: string; Name: string; IsActive: boolean };
-
-const schema = z.object({
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
-});
-
-type FormData = z.infer<typeof schema>;
+import { Department, schema, FormData } from '../../helpers/department/departmentValidation';
 
 export function DepartmentsPage() {
+  /******* STATE *******/
   const dispatch = useAppDispatch();
   const data = useAppSelector(selectDepartments) as Department[] | undefined;
   const isLoading = useAppSelector(selectDepartmentsLoading);
   const creating = useAppSelector(selectCreateDepartmentLoading);
   const createResponse = useAppSelector(selectCreateDepartmentResponse);
 
+  /******* FORM *******/
   const { register, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { code: '', name: '', description: '' },
   });
 
+  /******* EFFECTS *******/
   useEffect(() => {
     dispatch(fetchDepartmentsStart({ all: 'true' }));
   }, [dispatch]);
 
+  /******* HANDLERS *******/
   const resetCreate = useCallback(() => dispatch(createDepartmentResponseResetStart()), [dispatch]);
   useReduxResponse(createResponse, resetCreate, () => {
     celebrate('Department created');
@@ -53,6 +50,7 @@ export function DepartmentsPage() {
     dispatch(fetchDepartmentsStart({ all: 'true' }));
   });
 
+  /******* COLUMNS *******/
   const columns: Column<Department>[] = [
     {
       key: 'code',
