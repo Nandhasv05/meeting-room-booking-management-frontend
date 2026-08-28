@@ -1,28 +1,23 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Manager dashboard to view manager dashboard
 import { Link } from 'react-router-dom';
 import { ArrowRight, CalendarClock, DoorOpen, Monitor, Users, Wrench } from 'lucide-react';
 import { EmptyState, StatusBadge } from '../../components/ui/Feedback';
 import { fmtDate, fmtTime } from '../../utils/format';
-import { PulseStat, WelcomeBand, type Dash } from './shared';
-
-function hallTone(status: string, occupied: boolean) {
-  if (status === 'MAINTENANCE' || status === 'BLOCKED') return 'border-amber-300/50 bg-amber-50';
-  if (occupied || status === 'OCCUPIED' || status === 'BOOKED') return 'border-brand-400/30 bg-brand-50';
-  return 'border-signal/25 bg-signal/[0.07]';
-}
+import { PulseStat, type Dash } from './shared';
+import { hallTone } from '../../helpers/dashboard/dashboardValidation';
 
 export function ManagerDashboard({ data }: { data: Dash }) {
+  /******* STATE *******/
   const s = data.stats;
   const maxUtil = Math.max(...data.utilization.map((u) => Number(u.HoursBooked) || 0), 1);
   const maxPeak = Math.max(...data.peakHours.map((p) => Number(p.Count) || 0), 1);
   const occupiedNow = (data.hallBoard ?? []).filter((h) => h.CurrentEvent).length;
 
+  /******* RENDER *******/
   return (
     <div className="space-y-4 sm:space-y-5">
-      <WelcomeBand
-        kicker="Hall manager"
-        subtitle={`${occupiedNow} room${occupiedNow === 1 ? '' : 's'} in use · ${s.AvailableHalls ?? 0} free · ${s.TodayBookings ?? 0} on today’s board`}
-      />
-
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 stagger">
         <PulseStat icon={DoorOpen} label="Halls" value={s.TotalHalls} />
         <PulseStat icon={DoorOpen} label="Free" value={s.AvailableHalls} accent />

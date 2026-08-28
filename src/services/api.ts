@@ -1,52 +1,121 @@
-import axios, { type AxiosError } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { store, setSession, clearSession } from '../store';
 import type { ApiEnvelope } from '../types/api';
+import { API_CRYPTO_KEY, API_URL } from '../redux/const';
+import { encryptDataV2, decryptData, isDecryptFailure } from '../redux/_common/enode-decode';
+
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipCrypto?: boolean;
+    cryptoApplied?: boolean;
+  }
+}
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: API_URL,
   timeout: 20_000,
 });
+
+function shouldSkipCrypto(config: AxiosRequestConfig): boolean {
+  if (config.skipCrypto) return true;
+  if (config.responseType === 'blob' || config.responseType === 'arraybuffer') return true;
+  const url = `${config.baseURL ?? ''}${config.url ?? ''}`;
+  return url.includes('/reports/export');
+}
+
+function requestPayload(config: InternalAxiosRequestConfig): object | FormData {
+  const method = (config.method || 'get').toLowerCase();
+  const source = method === 'get' || method === 'head' ? config.params : config.data;
+  if (source == null) return {};
+  if (typeof FormData !== 'undefined' && source instanceof FormData) return source;
+  if (typeof source === 'object') return source as object;
+  return {};
+}
+
+function encryptRequest(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
+  if (config.cryptoApplied || shouldSkipCrypto(config)) return config;
+  const payload = requestPayload(config);
+  if (typeof FormData !== 'undefined' && payload instanceof FormData) return config;
+  const requestToken = encryptDataV2(payload, API_CRYPTO_KEY);
+  config.cryptoApplied = true;
+  const method = (config.method || 'get').toLowerCase();
+  if (method === 'get' || method === 'head') {
+    config.params = { requestToken };
+  } else {
+    config.data = { requestToken };
+  }
+  return config;
+}
+
+function decryptEnvelope(body: unknown): ApiEnvelope<unknown> | null {
+  if (!body || typeof body !== 'object') return null;
+  const envelope = body as { success?: boolean; message?: string; response?: unknown; data?: unknown };
+  if (typeof envelope.response !== 'string') {
+    if ('success' in envelope && 'data' in envelope) {
+      return envelope as ApiEnvelope<unknown>;
+    }
+    return null;
+  }
+  const decoded = decryptData(envelope.response, API_CRYPTO_KEY);
+  if (isDecryptFailure(decoded)) return null;
+  return {
+    success: Boolean(envelope.success),
+    message: envelope.message ?? '',
+    data: decoded?.data ?? null,
+  };
+}
 
 api.interceptors.request.use((config) => {
   const token = store.getState().auth.accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
+  return encryptRequest(config);
 });
 
 let refreshing: Promise<string | null> | null = null;
 
+async function refreshSession(): Promise<string | null> {
+  const refreshToken = store.getState().auth.refreshToken;
+  if (!refreshToken) return null;
+  const requestToken = encryptDataV2({ refreshToken }, API_CRYPTO_KEY);
+  const { data } = await axios.post(`${API_URL}/auth/refresh`, { requestToken });
+  const next = decryptEnvelope(data)?.data as { accessToken: string; refreshToken: string } | null;
+  if (!next?.accessToken) {
+    store.dispatch(clearSession());
+    return null;
+  }
+  store.dispatch(
+    setSession({
+      user: store.getState().auth.user,
+      accessToken: next.accessToken,
+      refreshToken: next.refreshToken,
+    }),
+  );
+  return next.accessToken;
+}
+
 api.interceptors.response.use(
-  (res) => res,
-  async (error: AxiosError<ApiEnvelope<null>>) => {
+  (res) => {
+    if (shouldSkipCrypto(res.config)) return res;
+    const unwrapped = decryptEnvelope(res.data);
+    if (!unwrapped) {
+      return Promise.reject(new Error('Failed to decrypt API response'));
+    }
+    res.data = unwrapped;
+    return res;
+  },
+  async (error: AxiosError<ApiEnvelope<null> & { response?: string }>) => {
+    if (error.response?.data && typeof error.response.data === 'object') {
+      const unwrapped = decryptEnvelope(error.response.data);
+      if (unwrapped) error.response.data = unwrapped as ApiEnvelope<null>;
+    }
     const original = error.config;
     if (!original || error.response?.status !== 401 || original.url?.includes('/auth/')) {
       return Promise.reject(error);
     }
     if (!refreshing) {
-      refreshing = (async () => {
-        const refreshToken = store.getState().auth.refreshToken;
-        if (!refreshToken) return null;
-        try {
-          const { data } = await axios.post<ApiEnvelope<{ accessToken: string; refreshToken: string; user: never }>>(
-            `${import.meta.env.VITE_API_URL || '/api'}/auth/refresh`,
-            { refreshToken },
-          );
-          const next = data.data;
-          store.dispatch(
-            setSession({
-              user: store.getState().auth.user,
-              accessToken: next.accessToken,
-              refreshToken: next.refreshToken,
-            }),
-          );
-          return next.accessToken;
-        } catch {
-          store.dispatch(clearSession());
-          return null;
-        } finally {
-          refreshing = null;
-        }
-      })();
+      refreshing = refreshSession().finally(() => {
+        refreshing = null;
+      });
     }
     const token = await refreshing;
     if (!token) return Promise.reject(error);

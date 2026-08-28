@@ -1,6 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { LogoSpinner } from '../brand/LogoSpinner';
+import { useAppSelector } from '../../store';
+import type { RootState } from '../../redux/root-reducer';
+
+function loadingFlags(state: RootState): string[] {
+  const flags: string[] = [];
+  for (const slice of Object.values(state) as any[]) {
+    if (!slice || typeof slice !== 'object') continue;
+    for (const [key, value] of Object.entries(slice)) {
+      if (key.endsWith('Loading') && value) flags.push(key);
+    }
+  }
+  return flags;
+}
+
+function isMutationFlag(key: string) {
+  return /^(login|save|create|update|delete|cancel|readAll|testMail)/i.test(key);
+}
 
 /** Delays turning on so quick requests don't flash the UI. */
 function useDelayedFlag(active: boolean, delay: number) {
@@ -18,7 +34,7 @@ function useDelayedFlag(active: boolean, delay: number) {
 
 /** Thin bar at the top of the window while any request is in flight. */
 export function GlobalProgress() {
-  const busy = useIsFetching() + useIsMutating() > 0;
+  const busy = useAppSelector((s) => loadingFlags(s).length > 0);
   const show = useDelayedFlag(busy, 140);
   if (!show) return null;
   return (
@@ -37,7 +53,7 @@ export function hideBootSplash() {
 
 /** Full-screen overlay only while a mutation is in flight (saves, deletes). */
 export function BusyOverlay() {
-  const mutating = useIsMutating() > 0;
+  const mutating = useAppSelector((s) => loadingFlags(s).some(isMutationFlag));
   const show = useDelayedFlag(mutating, 450);
   if (!show) return null;
   return <LogoSpinner fullScreen size="lg" label="Working…" />;

@@ -1,7 +1,8 @@
 import { useAppSelector } from '../store';
+import { selectCurrentUser } from '../redux/login/login.selector';
 
 export function usePermission() {
-  const user = useAppSelector((s) => s.auth.user);
+  const user = useAppSelector(selectCurrentUser);
   const can = (...codes: string[]) => {
     if (!user) return false;
     if (codes.length === 0) return true;

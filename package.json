@@ -15,9 +15,11 @@
     "@fullcalendar/list": "^6.1.15",
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
+    "@hookform/resolvers": "^5.9.1",
     "@reduxjs/toolkit": "^2.6.1",
     "@tanstack/react-query": "^5.69.0",
     "axios": "^1.8.4",
+    "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "lucide-react": "^0.484.0",
@@ -28,11 +30,14 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.4.0",
     "recharts": "^2.15.1",
+    "redux-saga": "^1.5.1",
     "socket.io-client": "^4.8.1",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/crypto-js": "^4.2.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

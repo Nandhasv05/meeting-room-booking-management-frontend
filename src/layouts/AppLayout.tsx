@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Topbar } from '../components/layout/Topbar';
+import { Footer } from '../components/layout/Footer';
 import { ShellProvider } from '../components/layout/ShellContext';
 import { useAppSelector } from '../store';
 
@@ -20,6 +21,7 @@ export function AppLayout() {
           >
             <Outlet />
           </main>
+          <Footer />
         </div>
       </div>
     </ShellProvider>

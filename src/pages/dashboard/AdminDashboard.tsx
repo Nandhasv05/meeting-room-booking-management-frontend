@@ -1,3 +1,6 @@
+// AUTHOR : NANDNHAKUMAR SV 
+// DATE : 27/08/2026
+// DESCRIPTION : Admin dashboard to view admin dashboard
 import { Link } from 'react-router-dom';
 import {
   Area,
@@ -10,19 +13,20 @@ import {
 } from 'recharts';
 import { Building2, CalendarClock, ClipboardList, Settings, Shield, Users, Wrench } from 'lucide-react';
 import { StatusBadge } from '../../components/ui/Feedback';
-import { PulseStat, WelcomeBand, type Dash } from './shared';
+import { PulseStat, type Dash } from './shared';
 
 export function AdminDashboard({ data }: { data: Dash }) {
+  /******* STATE *******/
   const s = data.stats;
   const maxDept = Math.max(...data.byDepartment.map((d) => Number(d.Count) || 0), 1);
   const maxRole = Math.max(...data.usersByRole.map((r) => Number(r.Count) || 0), 1);
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      <WelcomeBand
+      {/* <WelcomeBand
         kicker="Administrator"
         subtitle={`${s.ActiveUsers ?? 0} active users · ${s.TotalHalls ?? 0} halls · ${s.TodayBookings ?? 0} bookings today`}
-      />
+      /> */}
 
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 stagger">
         <PulseStat icon={Users} label="Users" value={s.TotalUsers} />

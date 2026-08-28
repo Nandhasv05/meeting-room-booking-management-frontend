@@ -1,12 +1,13 @@
 import { Bell, LogOut, Menu } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { api, unwrap } from '../../services/api';
-import { clearSession, useAppDispatch, useAppSelector } from '../../store';
+import { userSignInLogOutStart, useAppDispatch, useAppSelector } from '../../store';
 import { useShell } from './ShellContext';
 import { isAdminRole } from '../../utils/roles';
+import { fetchNotificationsStart } from '../../redux/notifications/notifications.action';
+import { selectNotifications } from '../../redux/notifications/notifications.selector';
+import { selectCurrentUser } from '../../redux/login/login.selector';
 
 const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/bookings\/new/, title: 'New booking' },
@@ -63,7 +64,7 @@ function initials(first?: string, last?: string) {
 }
 
 export function Topbar() {
-  const user = useAppSelector((s) => s.auth.user);
+  const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,12 +76,14 @@ export function Topbar() {
 
   const title = useMemo(() => pageTitle(location.pathname, user?.roleCode), [location.pathname, user?.roleCode]);
 
-  const { data } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => unwrap<{ unread: number }>(api.get('/notifications')),
-    refetchInterval: 30_000,
-  });
-  const unread = data?.unread ?? 0;
+  const notifications = useAppSelector(selectNotifications) as { unread?: number } | null;
+  const unread = notifications?.unread ?? 0;
+
+  useEffect(() => {
+    dispatch(fetchNotificationsStart());
+    const id = window.setInterval(() => dispatch(fetchNotificationsStart()), 30_000);
+    return () => window.clearInterval(id);
+  }, [dispatch]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000);
@@ -115,8 +118,7 @@ export function Topbar() {
 
   const signOut = () => {
     setMenuOpen(false);
-    void api.post('/auth/logout').catch(() => undefined);
-    dispatch(clearSession());
+    dispatch(userSignInLogOutStart());
     navigate('/login', { replace: true });
   };
 

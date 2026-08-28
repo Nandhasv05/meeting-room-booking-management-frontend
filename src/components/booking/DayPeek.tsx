@@ -1,11 +1,12 @@
-import { useMemo, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { api, unwrap } from '../../services/api';
 import { fmtTime } from '../../utils/format';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { fetchCalendarStart } from '../../redux/calendar/calendar.action';
+import { selectCalendar } from '../../redux/calendar/calendar.selector';
 
-export type DayEvent = {
+export type day_event_type = {
   Id: string;
   EventName: string;
   StartAt: string;
@@ -56,7 +57,7 @@ function hourLabel(hour: number) {
 }
 
 /** Packs overlapping events into side-by-side lanes so nothing is hidden. */
-function laneLayout(events: DayEvent[], day: string) {
+function laneLayout(events: day_event_type[], day: string) {
   const sorted = [...events].sort(
     (a, b) => minutesFromDate(a.StartAt, day) - minutesFromDate(b.StartAt, day),
   );
@@ -119,22 +120,20 @@ export function DayPeek({
   const gridTop = fromHour * 60;
   const gridHeight = hours.length * HOUR_PX;
 
-  const { data, isError } = useQuery({
-    queryKey: ['day-peek', date, hallId],
-    queryFn: () =>
-      unwrap<{ bookings: DayEvent[]; maintenance: DayEvent[] }>(
-        api.get('/calendar', {
-          params: {
-            from: new Date(`${date}T00:00:00`).toISOString(),
-            to: new Date(`${date}T23:59:59`).toISOString(),
-            hallId: hallId || undefined,
-          },
-        }),
-      ),
-    enabled: Boolean(date),
-    retry: false,
-    staleTime: 15_000,
-  });
+  const dispatch = useAppDispatch();
+  const data = useAppSelector(selectCalendar) as { bookings: day_event_type[]; maintenance: day_event_type[] } | null;
+  const isError = false;
+
+  useEffect(() => {
+    if (!date) return;
+    dispatch(
+      fetchCalendarStart({
+        from: new Date(`${date}T00:00:00`).toISOString(),
+        to: new Date(`${date}T23:59:59`).toISOString(),
+        hallId: hallId || undefined,
+      }),
+    );
+  }, [date, hallId, dispatch]);
 
   const events = useMemo(
     () => [...(data?.bookings ?? []), ...(data?.maintenance ?? [])].filter((e) => e.Status !== 'CANCELLED'),
