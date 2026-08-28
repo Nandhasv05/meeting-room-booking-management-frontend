@@ -11,11 +11,12 @@ import {
   Plus,
   Shield,
   LayoutDashboard,
+  Key,
   X,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { usePermission } from '../../hooks/usePermission';
-import { isOpsDashboardRole } from '../../utils/roles';
+import { isAdminRole } from '../../utils/roles';
 import { BrandLogo } from '../brand/BrandLogo';
 import { useShell } from './ShellContext';
 
@@ -67,28 +68,29 @@ function Group({
 
 function NavBody() {
   const { can, user } = usePermission();
+  const admin = isAdminRole(user?.roleCode);
+
   return (
     <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-      {can('dashboard.view') && isOpsDashboardRole(user?.roleCode) && (
-        <Item to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
-      )}
+      {admin && <Item to="/dashboard" label="Dashboard" icon={LayoutDashboard} />}
       <Group label="Bookings" icon={ClipboardList}>
         {can('bookings.create') && <Item to="/bookings/new" label="New Booking" icon={Plus} />}
         {can('calendar.view') && <Item to="/calendar" label="Booking" icon={CalendarDays} />}
         {can('bookings.view') && <Item to="/bookings" label="My Bookings" icon={ClipboardList} />}
       </Group>
-      {can('halls.view') && <Item to="/halls" label="Conference Halls" icon={DoorOpen} />}
-      {can('events.view') && <Item to="/events" label="Events" icon={CalendarDays} />}
-      {can('display.view') && <Item to="/displays" label="Displays" icon={Monitor} />}
-      {can('reports.view') && <Item to="/reports" label="Reports" icon={BarChart3} />}
-      {(can('users.view') || can('settings.manage') || can('audit.view')) && (
+      {admin && <Item to="/halls" label="Conference Halls" icon={DoorOpen} />}
+      {admin && <Item to="/events" label="Events" icon={CalendarDays} />}
+      {admin && <Item to="/displays" label="Displays" icon={Monitor} />}
+      {admin && <Item to="/reports" label="Reports" icon={BarChart3} />}
+      {admin && (
         <Group label="Administration" icon={Settings}>
-          {can('users.view') && <Item to="/admin/users" label="Users" icon={Users} />}
-          {can('roles.manage') && <Item to="/admin/roles" label="Roles" icon={Shield} />}
-          {can('departments.manage') && <Item to="/admin/departments" label="Departments" icon={Users} />}
-          {can('maintenance.view') && <Item to="/admin/maintenance" label="Maintenance" icon={Settings} />}
-          {can('settings.manage') && <Item to="/admin/settings" label="Settings" icon={Settings} />}
-          {can('audit.view') && <Item to="/admin/audit" label="Audit Logs" icon={ClipboardList} />}
+          <Item to="/admin/users" label="Users" icon={Users} />
+          <Item to="/admin/roles" label="Roles" icon={Shield} />
+          <Item to="/admin/departments" label="Departments" icon={Users} />
+          <Item to="/admin/maintenance" label="Maintenance" icon={Settings} />
+          <Item to="/admin/settings" label="Settings" icon={Settings} />
+          <Item to="/admin/encode-decode" label="Encode / Decode" icon={Key} />
+          <Item to="/admin/audit" label="Audit Logs" icon={ClipboardList} />
         </Group>
       )}
     </nav>

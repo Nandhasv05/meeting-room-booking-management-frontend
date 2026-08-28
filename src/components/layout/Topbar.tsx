@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { userSignInLogOutStart, useAppDispatch, useAppSelector } from '../../store';
 import { useShell } from './ShellContext';
-import { isAdminRole } from '../../utils/roles';
 import { fetchNotificationsStart } from '../../redux/notifications/notifications.action';
 import { selectNotifications } from '../../redux/notifications/notifications.selector';
 import { selectCurrentUser } from '../../redux/login/login.selector';
@@ -14,7 +13,6 @@ const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/bookings\/[^/]+/, title: 'Booking detail' },
   { match: /^\/bookings/, title: 'My bookings' },
   { match: /^\/calendar/, title: 'Booking' },
-  { match: /^\/approvals/, title: 'Approvals' },
   { match: /^\/halls\/facilities/, title: 'Facilities' },
   { match: /^\/halls\/new/, title: 'Add hall' },
   { match: /^\/halls\/[^/]+\/edit/, title: 'Edit hall' },
@@ -29,13 +27,14 @@ const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/admin\/roles/, title: 'Roles' },
   { match: /^\/admin\/departments/, title: 'Departments' },
   { match: /^\/admin\/settings/, title: 'Settings' },
+  { match: /^\/admin\/encode-decode/, title: 'Encode / Decode' },
   { match: /^\/admin\/audit/, title: 'Audit logs' },
   { match: /^\/admin\/maintenance/, title: 'Maintenance' },
 ];
 
-function pageTitle(pathname: string, roleCode?: string): string {
+function pageTitle(pathname: string): string {
   if (/^\/dashboard/.test(pathname)) {
-    return isAdminRole(roleCode) ? 'Admin dashboard' : 'Manager dashboard';
+    return 'Admin dashboard';
   }
   for (const row of PAGE_TITLES) {
     if (typeof row.match === 'string' ? pathname === row.match : row.match.test(pathname)) {
@@ -74,7 +73,7 @@ export function Topbar() {
   const avatarRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
 
-  const title = useMemo(() => pageTitle(location.pathname, user?.roleCode), [location.pathname, user?.roleCode]);
+  const title = useMemo(() => pageTitle(location.pathname), [location.pathname]);
 
   const notifications = useAppSelector(selectNotifications) as { unread?: number } | null;
   const unread = notifications?.unread ?? 0;
