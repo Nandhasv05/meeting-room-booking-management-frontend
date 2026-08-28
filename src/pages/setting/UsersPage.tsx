@@ -119,7 +119,7 @@ export function UsersPage() {
     <div>
       <PageHeader
         title="Users"
-        description="Live directory from CLIENT_API_LIVE (SP_GET_USERS)."
+        description="CLIENT_API_LIVE directory (SP_GET_USERS). TCS department = full access; all other departments = employee."
         actions={
           can('users.manage') ? (
             <PrimaryButton type="button" onClick={() => setOpen(true)}>

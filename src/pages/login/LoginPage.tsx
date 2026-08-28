@@ -122,7 +122,7 @@ export function LoginPage() {
           </div>
           <h2 className="font-display text-xl font-semibold text-navy-900 sm:text-2xl">Sign in</h2>
           <p className="mb-5 mt-1.5 text-sm text-navy-800/60">
-            Test password: <code className="text-brand-500">password#1</code>
+            Directory is CLIENT_API_LIVE. TCS department gets full access; everyone else is employee.
           </p>
 
           <div className="mb-5 flex flex-wrap gap-2">
@@ -135,8 +135,8 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
             <label className="block text-sm">
-              <span className="mb-1 block font-medium text-navy-900">Email</span>
-              <input type="email" className={inputClass} {...register('email')} />
+              <span className="mb-1 block font-medium text-navy-900">Email or username</span>
+              <input type="text" autoComplete="username" className={inputClass} {...register('email')} />
               {errors.email ? <p className="mt-1 text-xs text-rose-700">{errors.email.message}</p> : null}
             </label>
             <label className="block text-sm">
