@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Building2, CalendarClock, ClipboardList, Settings, Shield, Users, Wrench } from 'lucide-react';
+import { Building2, CalendarClock, ClipboardList, KeyRound, Settings, Shield, Users, Wrench } from 'lucide-react';
 import { StatusBadge } from '../../components/ui/Feedback';
 import { PulseStat, type Dash } from './shared';
 
@@ -135,6 +135,7 @@ export function AdminDashboard({ data }: { data: Dash }) {
           <AdminLink to="/admin/roles" icon={Shield} label="Roles" hint="Permissions" />
           <AdminLink to="/admin/departments" icon={Building2} label="Departments" hint="Org units" />
           <AdminLink to="/admin/settings" icon={Settings} label="Settings" hint="System options" />
+          <AdminLink to="/admin/encode-decode" icon={KeyRound} label="Encode / Decode" hint="requestToken JSON" />
           <AdminLink to="/admin/audit" icon={ClipboardList} label="Audit logs" hint="Who changed what" />
           <AdminLink to="/admin/maintenance" icon={Wrench} label="Maintenance" hint="Hall downtime" />
           <AdminLink to="/reports" icon={CalendarClock} label="Reports" hint="Utilization & trends" />

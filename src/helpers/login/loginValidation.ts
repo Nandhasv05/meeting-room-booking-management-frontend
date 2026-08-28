@@ -3,20 +3,13 @@
 // DESCRIPTION : Login validation schema
 import { z } from "zod";
 
+// LOGIN SCHEMA
 export const loginSchema = z.object({
-    email: z.string().email('Enter a valid email').min(1, 'Email is required'),
+    email: z.string().min(1, 'Email or username is required'),
     password: z.string().min(1, 'Password is required'),
   });
   
 export type LoginFormData = z.infer<typeof loginSchema>;
-  
-export const TEST_USERS = [
-    { label: 'Admin', email: 'admin@evoloclothing.com' },
-    { label: 'Manager', email: 'manager@evlovcolthing.com' },
-    { label: 'Nandhakumar', email: 'nandhakumar@evolvclothing.com' },
-  ] as const;
-  
-export const TEST_PASSWORD = 'password#1';
 
 // LOGIN FIELD
 export const loginField =

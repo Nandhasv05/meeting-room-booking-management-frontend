@@ -19,17 +19,19 @@ import { UsersPage } from '../pages/setting/UsersPage';
 import { RolesPage } from '../pages/role/RolesPage';
 import { DepartmentsPage } from '../pages/department/DepartmentsPage';
 import { SettingsPage } from '../pages/setting/SettingsPage';
+import { EncodeDecodePage, EncodeDecodeStandalonePage } from '../pages/setting/EncodeDecodePage';
 import { AuditPage } from '../pages/audit/AuditPage';
 import { MaintenancePage } from '../pages/setting/MaintenancePage';
 import { FacilitiesPage } from '../pages/hall/FacilitiesPage';
 import { NotificationsPage } from '../pages/setting/NotificationsPage';
 import { NotFoundPage } from '../pages/error/NotFoundPage';
-import { isOpsDashboardRole } from '../utils/roles';
+import { isAdminRole } from '../utils/roles';
 import { useAppSelector } from '../store';
+import { EncodeDecodeGate, RequireAdmin } from './guards';
 
 function HomeRedirect() {
   const code = useAppSelector((s) => s.auth.user?.roleCode);
-  if (isOpsDashboardRole(code)) return <Navigate to="/dashboard" replace />;
+  if (isAdminRole(code)) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/calendar" replace />;
 }
 
@@ -40,29 +42,35 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
       </Route>
       <Route path="/display/:hallCode" element={<DisplayPage />} />
+      <Route element={<EncodeDecodeGate />}>
+        <Route path="/encode-decode" element={<EncodeDecodeStandalonePage />} />
+      </Route>
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomeRedirect />} />
-        <Route path="/Dashboard" element={<DashboardPage />} />
-        <Route path="/Halls" element={<HallsPage />} />
-        <Route path="/Halls/Facilities" element={<FacilitiesPage />} />
-        <Route path="/Halls/New" element={<HallFormPage />} />
-        <Route path="/Halls/:id" element={<HallDetailPage />} />
-        <Route path="/Halls/:id/Edit" element={<HallFormPage />} />
         <Route path="/Bookings/New" element={<BookingFormPage />} />
         <Route path="/Bookings" element={<MyBookingsPage />} />
         <Route path="/Bookings/:id" element={<BookingDetailPage />} />
         <Route path="/Calendar" element={<CalendarPage />} />
-        <Route path="/Events" element={<EventsPage />} />
-        <Route path="/Events/:id" element={<EventDetailPage />} />
-        <Route path="/Displays" element={<DisplaysIndexPage />} />
-        <Route path="/Reports" element={<ReportsPage />} />
         <Route path="/Notifications" element={<NotificationsPage />} />
-        <Route path="/Admin/users" element={<UsersPage />} />
-        <Route path="/Admin/roles" element={<RolesPage />} />
-        <Route path="/Admin/departments" element={<DepartmentsPage />} />
-        <Route path="/Admin/settings" element={<SettingsPage />} />
-        <Route path="/Admin/audit" element={<AuditPage />} />
-        <Route path="/Admin/maintenance" element={<MaintenancePage />} />
+        <Route element={<RequireAdmin />}>
+          <Route path="/Dashboard" element={<DashboardPage />} />
+          <Route path="/Halls" element={<HallsPage />} />
+          <Route path="/Halls/Facilities" element={<FacilitiesPage />} />
+          <Route path="/Halls/New" element={<HallFormPage />} />
+          <Route path="/Halls/:id" element={<HallDetailPage />} />
+          <Route path="/Halls/:id/Edit" element={<HallFormPage />} />
+          <Route path="/Events" element={<EventsPage />} />
+          <Route path="/Events/:id" element={<EventDetailPage />} />
+          <Route path="/Displays" element={<DisplaysIndexPage />} />
+          <Route path="/Reports" element={<ReportsPage />} />
+          <Route path="/Admin/users" element={<UsersPage />} />
+          <Route path="/Admin/roles" element={<RolesPage />} />
+          <Route path="/Admin/departments" element={<DepartmentsPage />} />
+          <Route path="/Admin/settings" element={<SettingsPage />} />
+          <Route path="/Admin/encode-decode" element={<EncodeDecodePage />} />
+          <Route path="/Admin/audit" element={<AuditPage />} />
+          <Route path="/Admin/maintenance" element={<MaintenancePage />} />
+        </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
