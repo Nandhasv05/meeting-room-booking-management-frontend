@@ -39,7 +39,7 @@ export function BookingFormPage() {
   const signedIn = useAppSelector(selectCurrentUser);
   const halls = useAppSelector(selectHalls) as Hall[] | undefined;
   const isLoading = useAppSelector(selectHallsLoading);
-  const departments = useAppSelector(selectDepartments) as { Id: string; Name: string }[] | undefined;
+  const departments = useAppSelector(selectDepartments) as { Id: string; Name: string; Code?: string }[] | undefined;
   const pending = useAppSelector(selectCreateBookingLoading);
   const createResponse = useAppSelector(selectCreateBookingResponse);
 
@@ -67,6 +67,20 @@ export function BookingFormPage() {
       purpose: '',
     },
   });
+
+  useEffect(() => {
+    const list = departments ?? [];
+    if (!list.length) return;
+    const current = String(methods.getValues('departmentId') ?? '');
+    const match = list.find((d) => {
+      const id = String(d.Id);
+      const code = String(d.Code ?? '').toUpperCase();
+      const name = String(d.Name ?? '').toUpperCase();
+      const value = current.toUpperCase();
+      return id === current || code === value || name === value;
+    });
+    if (match && String(match.Id) !== current) methods.setValue('departmentId', String(match.Id));
+  }, [departments, methods]);
 
   /******* HANDLERS *******/
   const resetCreate = useCallback(() => dispatch(createBookingResponseResetStart()), [dispatch]);

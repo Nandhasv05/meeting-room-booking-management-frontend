@@ -80,7 +80,7 @@ function NavBody() {
       </Group>
       {admin && <Item to="/halls" label="Conference Halls" icon={DoorOpen} />}
       {admin && <Item to="/events" label="Events" icon={CalendarDays} />}
-      {admin && <Item to="/displays" label="Displays" icon={Monitor} />}
+      {can('display.view') && <Item to="/displays" label="Displays" icon={Monitor} />}
       {admin && <Item to="/reports" label="Reports" icon={BarChart3} />}
       {admin && (
         <Group label="Administration" icon={Settings}>

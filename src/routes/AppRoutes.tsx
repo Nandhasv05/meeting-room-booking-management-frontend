@@ -51,6 +51,7 @@ export function AppRoutes() {
         <Route path="/Bookings" element={<MyBookingsPage />} />
         <Route path="/Bookings/:id" element={<BookingDetailPage />} />
         <Route path="/Calendar" element={<CalendarPage />} />
+        <Route path="/Displays" element={<DisplaysIndexPage />} />
         <Route path="/Notifications" element={<NotificationsPage />} />
         <Route element={<RequireAdmin />}>
           <Route path="/Dashboard" element={<DashboardPage />} />
@@ -61,7 +62,6 @@ export function AppRoutes() {
           <Route path="/Halls/:id/Edit" element={<HallFormPage />} />
           <Route path="/Events" element={<EventsPage />} />
           <Route path="/Events/:id" element={<EventDetailPage />} />
-          <Route path="/Displays" element={<DisplaysIndexPage />} />
           <Route path="/Reports" element={<ReportsPage />} />
           <Route path="/Admin/users" element={<UsersPage />} />
           <Route path="/Admin/roles" element={<RolesPage />} />
