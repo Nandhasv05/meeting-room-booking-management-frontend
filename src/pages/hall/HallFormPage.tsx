@@ -1,14 +1,16 @@
 // AUTHOR : NANDNHAKUMAR SV 
-// DATE : 28/08/2026
-// DESCRIPTION : Hall form page to create and edit hall
-import { useCallback, useEffect } from 'react';
+// DATE : 01/09/2026
+// DESCRIPTION : Hall form page to create and edit hall, including maintenance status
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, Clock, DoorOpen, Hash, LayoutGrid, MapPin, Sparkles, Users } from 'lucide-react';
+import { addHours, format } from 'date-fns';
+import { Building2, Clock, DoorOpen, Hash, LayoutGrid, MapPin, Sparkles, Users, Wrench } from 'lucide-react';
+import toast from 'react-hot-toast';
 import type { Hall } from '../../types/api';
-import { HALL_TYPES } from '../../types/api';
-import { Spinner } from '../../components/ui/Feedback';
+import { hallStatusOptions, HALL_TYPES } from '../../types/api';
+import { Spinner, StatusBadge } from '../../components/ui/Feedback';
 import { celebrate } from '../../components/ui/SuccessFx';
 import { GhostButton, PrimaryButton } from '../../components/ui/Form';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -25,31 +27,48 @@ import {
   selectSaveHallLoading,
   selectSaveHallResponse,
 } from '../../redux/halls/halls.selector';
+import {
+  createMaintenanceResponseResetStart,
+  createMaintenanceStart,
+  fetchMaintenanceStart,
+} from '../../redux/maintenance/maintenance.action';
+import {
+  selectCreateMaintenanceLoading,
+  selectCreateMaintenanceResponse,
+  selectMaintenance,
+} from '../../redux/maintenance/maintenance.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
 import { hallField, hallSchema, HallInput, HallValues } from '@/helpers/hall/facililitesValidation';
+import { Maint, maintenanceDuration, maintenancePhase } from '../../helpers/setting/settingValidation';
+import { fmtDateTime } from '../../utils/format';
+
+function localInput(d: Date) {
+  return format(d, "yyyy-MM-dd'T'HH:mm");
+}
 
 export function HallFormPage() {
-
-  /******* STATE *******/
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const pendingMaint = useRef<{
+    hallId?: string;
+    title: string;
+    startAt: string;
+    endAt: string;
+    description?: string;
+  } | null>(null);
 
-  /******* SELECTORS *******/
   const existing = useAppSelector(selectHall) as Hall | null;
   const isLoading = useAppSelector(selectHallLoading);
   const facilities = useAppSelector(selectFacilities) as { Id: string; Name: string }[] | undefined;
   const savePending = useAppSelector(selectSaveHallLoading);
   const saveResponse = useAppSelector(selectSaveHallResponse);
+  const creatingMaint = useAppSelector(selectCreateMaintenanceLoading);
+  const createMaintResponse = useAppSelector(selectCreateMaintenanceResponse);
+  const maintenance = useAppSelector(selectMaintenance) as Maint[] | undefined;
 
-  /******* EFFECTS *******/
-  useEffect(() => {
-    dispatch(fetchFacilitiesStart());
-    if (id) dispatch(fetchHallStart({ id }));
-  }, [id, dispatch]);
-
-  /******* HANDLERS *******/
   const source = id ? existing : null;
+  const start = new Date();
   const initial: HallInput = {
     name: source?.Name ?? '',
     code: source?.Code ?? '',
@@ -63,9 +82,13 @@ export function HallFormPage() {
     closingTime: String(source?.ClosingTime ?? '20:00').slice(0, 5),
     facilityIds: source?.facilities?.map((f) => f.Id) ?? [],
     layouts: [{ name: 'Theatre', capacity: source?.Capacity ?? 20, isDefault: true }],
+    status: source?.Status ?? 'AVAILABLE',
+    maintTitle: '',
+    maintStartAt: localInput(start),
+    maintEndAt: localInput(addHours(start, 2)),
+    maintDescription: '',
   };
 
-  /******* FORM *******/
   const {
     register,
     handleSubmit,
@@ -79,17 +102,51 @@ export function HallFormPage() {
   });
 
   const values = watch();
+  const isMaintenance = values.status === 'MAINTENANCE';
 
-  /******* EFFECTS *******/
+  useEffect(() => {
+    dispatch(fetchFacilitiesStart());
+    dispatch(fetchMaintenanceStart());
+    if (id) dispatch(fetchHallStart({ id }));
+  }, [id, dispatch]);
+
   useEffect(() => {
     reset(initial);
   }, [existing, id, reset]);
 
-  /******* HANDLERS *******/
-  const resetSave = useCallback(() => dispatch(saveHallResponseResetStart()), [dispatch]);
-  useReduxResponse(saveResponse, resetSave, () => {
+  const hallWindows = useMemo(() => {
+    if (!id) return [];
+    return (maintenance ?? []).filter((item) => {
+      if (item.HallId) return String(item.HallId) === String(id);
+      return existing && item.HallName === existing.Name;
+    });
+  }, [existing, id, maintenance]);
+
+  const finishSave = useCallback(() => {
     celebrate(id ? 'Hall updated' : 'Hall created', 'It is now available for bookings.');
     navigate('/halls');
+  }, [id, navigate]);
+
+  const resetSave = useCallback(() => dispatch(saveHallResponseResetStart()), [dispatch]);
+  useReduxResponse(saveResponse, resetSave, (response) => {
+    const hallId = id || (response as { data?: { Id?: string } }).data?.Id;
+    const next = pendingMaint.current;
+    if (next && hallId) {
+      dispatch(
+        createMaintenanceStart({
+          ...next,
+          hallId,
+        }),
+      );
+      return;
+    }
+    finishSave();
+  });
+
+  const resetCreate = useCallback(() => dispatch(createMaintenanceResponseResetStart()), [dispatch]);
+  useReduxResponse(createMaintResponse, resetCreate, () => {
+    pendingMaint.current = null;
+    finishSave();
   });
 
   if (id && isLoading) return <Spinner />;
@@ -99,7 +156,21 @@ export function HallFormPage() {
       <form
         className="overflow-hidden rounded-2xl border border-navy-800/10 bg-white shadow-panel"
         onSubmit={handleSubmit((v) => {
-          const { layouts, ...rest } = v;
+          const { layouts, maintTitle, maintStartAt, maintEndAt, maintDescription, ...rest } = v;
+          const switchingToMaint = rest.status === 'MAINTENANCE' && source?.Status !== 'MAINTENANCE';
+          const scheduling = rest.status === 'MAINTENANCE' && Boolean(maintTitle?.trim() && maintStartAt && maintEndAt);
+          if (switchingToMaint && !scheduling) {
+            toast.error('Set a maintenance window (title, start, and end).');
+            return;
+          }
+          pendingMaint.current = scheduling
+            ? {
+                title: maintTitle!.trim(),
+                startAt: new Date(maintStartAt!).toISOString(),
+                endAt: new Date(maintEndAt!).toISOString(),
+                description: maintDescription,
+              }
+            : null;
           dispatch(
             saveHallStart({
               id,
@@ -112,130 +183,182 @@ export function HallFormPage() {
           );
         })}
       >
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-navy-800/8 bg-mist/40 px-3 py-2.5 sm:px-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-navy-900 shadow-soft">
-                  <DoorOpen className="h-3.5 w-3.5 text-brand-500" />
-                  {id ? 'Edit hall' : 'New hall'}
-                </span>
-                {values.code ? (
-                  <span className="rounded-full bg-navy-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
-                    {values.code}
-                  </span>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-navy-800/8 bg-mist/40 px-3 py-2.5 sm:px-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-navy-900 shadow-soft">
+              <DoorOpen className="h-3.5 w-3.5 text-brand-500" />
+              {id ? 'Edit hall' : 'New hall'}
+            </span>
+            {values.code ? (
+              <span className="rounded-full bg-navy-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
+                {values.code}
+              </span>
+            ) : null}
+            {values.status ? <StatusBadge value={values.status} /> : null}
+          </div>
+          <div className="flex items-center gap-2">
+            <GhostButton type="button" onClick={() => navigate('/halls')}>
+              Discard
+            </GhostButton>
+            <PrimaryButton type="submit" disabled={savePending || creatingMaint}>
+              {savePending || creatingMaint ? 'Saving…' : id ? 'Save changes' : 'Create hall'}
+            </PrimaryButton>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="space-y-6 p-4 sm:p-5">
+            <Section icon={Building2} title="Identity" hint="How the hall is named and found.">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Labelled label="Hall name" error={errors.name?.message}>
+                  <input placeholder="Auditorium" className={hallField} {...register('name')} />
+                </Labelled>
+                <Labelled
+                  label="Hall code"
+                  hint={id ? 'Fixed after creation' : 'Short unique ID, e.g. AUD-1'}
+                  error={errors.code?.message}
+                >
+                  <input placeholder="AUD-1" className={hallField} disabled={Boolean(id)} {...register('code')} />
+                </Labelled>
+                <Labelled label="Building">
+                  <input placeholder="Tower C" className={hallField} {...register('building')} />
+                </Labelled>
+                <Labelled label="Floor">
+                  <input placeholder="Ground" className={hallField} {...register('floor')} />
+                </Labelled>
+                <Labelled label="Status" error={errors.status?.message}>
+                  <select className={hallField} {...register('status')}>
+                    {hallStatusOptions(values.status || source?.Status || 'AVAILABLE').map((status) => (
+                      <option key={status} value={status}>
+                        {status.replaceAll('_', ' ')}
+                      </option>
+                    ))}
+                  </select>
+                </Labelled>
+                <div className="sm:col-span-2">
+                  <Labelled label="Location">
+                    <input placeholder="Near the east lifts" className={hallField} {...register('location')} />
+                  </Labelled>
+                </div>
+                <div className="sm:col-span-2">
+                  <Labelled label="Description">
+                    <textarea
+                      rows={3}
+                      placeholder="What this hall is best suited for"
+                      className={`${hallField} resize-y`}
+                      {...register('description')}
+                    />
+                  </Labelled>
+                </div>
+              </div>
+            </Section>
+
+            {isMaintenance ? (
+              <Section icon={Wrench} title="Maintenance" hint="This hall cannot be booked while it is in maintenance.">
+                {hallWindows.length ? (
+                  <ul className="mb-4 space-y-2">
+                    {hallWindows.map((item) => (
+                      <li
+                        key={item.Id}
+                        className="rounded-xl border border-navy-800/10 bg-mist/40 px-3 py-2.5 text-sm"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="font-semibold text-navy-900">{item.Title}</p>
+                          <StatusBadge
+                            value={maintenancePhase(item) === 'active' ? 'MAINTENANCE' : item.Status}
+                          />
+                        </div>
+                        <p className="mt-1 text-xs text-navy-800/55">
+                          {fmtDateTime(item.StartAt)} – {fmtDateTime(item.EndAt)} · {maintenanceDuration(item.StartAt, item.EndAt)}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
                 ) : null}
-              </div>
-              <div className="flex items-center gap-2">
-                <GhostButton type="button" onClick={() => navigate('/halls')}>
-                  Discard
-                </GhostButton>
-                <PrimaryButton type="submit" disabled={savePending}>
-                  {savePending ? 'Saving…' : id ? 'Save changes' : 'Create hall'}
-                </PrimaryButton>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-[minmax(0,1fr)_20rem]">
-              <div className="space-y-6 p-4 sm:p-5">
-                <Section icon={Building2} title="Identity" hint="How the hall is named and found.">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Labelled label="Hall name" error={errors.name?.message}>
-                      <input placeholder="Auditorium" className={hallField} {...register('name')} />
-                    </Labelled>
-                    <Labelled
-                      label="Hall code"
-                      hint={id ? 'Fixed after creation' : 'Short unique ID, e.g. AUD-1'}
-                      error={errors.code?.message}
-                    >
-                      <input placeholder="AUD-1" className={hallField} disabled={Boolean(id)} {...register('code')} />
-                    </Labelled>
-                    <Labelled label="Building">
-                      <input placeholder="Tower C" className={hallField} {...register('building')} />
-                    </Labelled>
-                    <Labelled label="Floor">
-                        <input placeholder="Ground" className={hallField} {...register('floor')} />
-                    </Labelled>
-                    <div className="sm:col-span-2">
-                      <Labelled label="Location">
-                        <input placeholder="Near the east lifts" className={hallField} {...register('location')} />
-                      </Labelled>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Labelled label="Description">
-                        <textarea
-                          rows={3}
-                          placeholder="What this hall is best suited for"
-                          className={`${hallField} resize-y`}
-                          {...register('description')}
-                        />
-                      </Labelled>
-                    </div>
-                  </div>
-                </Section>
-
-                <Section icon={LayoutGrid} title="Capacity & hours" hint="Used to validate every booking request.">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <Labelled label="Capacity" error={errors.capacity?.message}>
-                      <input type="number" min={1} className={hallField} {...register('capacity')} />
-                    </Labelled>
-                    <Labelled label="Hall type">
-                      <select className={hallField} {...register('hallType')}>
-                        {HALL_TYPES.map((t) => (
-                          <option key={t}>{t}</option>
-                        ))}
-                      </select>
-                    </Labelled>
-                    <Labelled label="Opens">
-                        <input type="time" className={hallField} {...register('openingTime')} />
-                    </Labelled>
-                    <Labelled label="Closes" error={errors.closingTime?.message}>
-                      <input type="time" className={hallField} {...register('closingTime')} />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Labelled label="Window title" error={errors.maintTitle?.message}>
+                      <input placeholder="AC service, painting, AV repair…" className={hallField} {...register('maintTitle')} />
                     </Labelled>
                   </div>
-                </Section>
+                  <Labelled label="Start" error={errors.maintStartAt?.message}>
+                    <input type="datetime-local" className={hallField} {...register('maintStartAt')} />
+                  </Labelled>
+                  <Labelled label="End" error={errors.maintEndAt?.message}>
+                    <input type="datetime-local" className={hallField} {...register('maintEndAt')} />
+                  </Labelled>
+                  <div className="sm:col-span-2">
+                    <Labelled label="Notes" error={errors.maintDescription?.message}>
+                      <textarea rows={3} className={`${hallField} resize-y`} {...register('maintDescription')} />
+                    </Labelled>
+                  </div>
+                </div>
+              </Section>
+            ) : null}
 
-                <Section icon={Sparkles} title="Facilities" hint="Tap to include an amenity in this hall.">
-                  {!facilities?.length ? (
-                    <p className="text-sm text-navy-800/45">No facilities defined yet.</p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {facilities.map((f) => {
-                        const on = values.facilityIds.includes(f.Id);
-                        return (
-                          <button
-                            type="button"
-                            key={f.Id}
-                            className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
-                              on
-                                ? 'border-navy-900 bg-navy-900 text-white shadow-soft'
-                                : 'border-navy-800/12 bg-white text-navy-800/70 hover:border-brand-400/40 hover:bg-brand-50'
-                            }`}
-                            onClick={() =>
-                              setValue(
-                                'facilityIds',
-                                on ? values.facilityIds.filter((x) => x !== f.Id) : [...values.facilityIds, f.Id],
-                              )
-                            }
-                          >
-                            {f.Name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </Section>
+            <Section icon={LayoutGrid} title="Capacity & hours" hint="Used to validate every booking request.">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Labelled label="Capacity" error={errors.capacity?.message}>
+                  <input type="number" min={1} className={hallField} {...register('capacity')} />
+                </Labelled>
+                <Labelled label="Hall type">
+                  <select className={hallField} {...register('hallType')}>
+                    {HALL_TYPES.map((t) => (
+                      <option key={t}>{t}</option>
+                    ))}
+                  </select>
+                </Labelled>
+                <Labelled label="Opens">
+                  <input type="time" className={hallField} {...register('openingTime')} />
+                </Labelled>
+                <Labelled label="Closes" error={errors.closingTime?.message}>
+                  <input type="time" className={hallField} {...register('closingTime')} />
+                </Labelled>
               </div>
+            </Section>
 
-              <aside className="border-t border-navy-800/8 bg-mist/25 p-4 lg:border-l lg:border-t-0">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-navy-800/45">Preview</p>
-                <HallPreview values={values} facilities={facilities ?? []} />
-              </aside>
-            </div>
-          </form>
+            <Section icon={Sparkles} title="Facilities" hint="Tap to include an amenity in this hall.">
+              {!facilities?.length ? (
+                <p className="text-sm text-navy-800/45">No facilities defined yet.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {facilities.map((f) => {
+                    const on = values.facilityIds.includes(f.Id);
+                    return (
+                      <button
+                        type="button"
+                        key={f.Id}
+                        className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                          on
+                            ? 'border-navy-900 bg-navy-900 text-white shadow-soft'
+                            : 'border-navy-800/12 bg-white text-navy-800/70 hover:border-brand-400/40 hover:bg-brand-50'
+                        }`}
+                        onClick={() =>
+                          setValue(
+                            'facilityIds',
+                            on ? values.facilityIds.filter((x) => x !== f.Id) : [...values.facilityIds, f.Id],
+                          )
+                        }
+                      >
+                        {f.Name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Section>
+          </div>
+
+          <aside className="border-t border-navy-800/8 bg-mist/25 p-4 lg:border-l lg:border-t-0">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-navy-800/45">Preview</p>
+            <HallPreview values={values} facilities={facilities ?? []} />
+          </aside>
+        </div>
+      </form>
     </div>
   );
 }
 
-// HALL PREVIEW COMPONENT
 function HallPreview({
   values,
   facilities,
@@ -262,6 +385,7 @@ function HallPreview({
         <PreviewRow icon={MapPin} label="Where" value={place || 'Location not set'} />
         <PreviewRow icon={Users} label="Seats" value={`${values.capacity || 0} people`} />
         <PreviewRow icon={Clock} label="Open" value={`${values.openingTime} – ${values.closingTime}`} />
+        <PreviewRow icon={Wrench} label="Status" value={values.status || 'AVAILABLE'} />
       </dl>
       {picked.length ? (
         <div className="border-t border-navy-800/8 px-4 py-3">
@@ -284,7 +408,6 @@ function HallPreview({
   );
 }
 
-// PREVIEW ROW COMPONENT
 function PreviewRow({ icon: Icon, label, value }: { icon: typeof Clock; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2.5">
@@ -299,8 +422,6 @@ function PreviewRow({ icon: Icon, label, value }: { icon: typeof Clock; label: s
   );
 }
 
-
-// SECTION COMPONENT
 function Section({
   icon: Icon,
   title,
@@ -328,7 +449,6 @@ function Section({
   );
 }
 
-// LABELED COMPONENT
 function Labelled({
   label,
   hint,

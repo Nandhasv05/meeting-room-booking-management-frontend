@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addHours, format } from 'date-fns';
-import { Building2, Plus, Users, Wrench } from 'lucide-react';
+import { Building2, Pencil, Plus, Users, Wrench } from 'lucide-react';
 import type { Hall } from '../../types/api';
 import { hallStatusOptions } from '../../types/api';
 import { celebrate } from '../../components/ui/SuccessFx';
@@ -30,13 +30,16 @@ import {
 import {
   createMaintenanceResponseResetStart,
   createMaintenanceStart,
+  fetchMaintenanceStart,
 } from '../../redux/maintenance/maintenance.action';
 import {
   selectCreateMaintenanceLoading,
   selectCreateMaintenanceResponse,
+  selectMaintenance,
 } from '../../redux/maintenance/maintenance.selector';
 import { useReduxResponse } from '../../redux/_common/useReduxResponse';
-import { FormData, schema } from '../../helpers/setting/settingValidation';
+import { FormData, Maint, maintenanceDuration, schema } from '../../helpers/setting/settingValidation';
+import { fmtDateTime } from '../../utils/format';
 
 function localInput(d: Date) {
   return format(d, "yyyy-MM-dd'T'HH:mm");
@@ -56,6 +59,7 @@ export function HallsPage() {
   const saveResponse = useAppSelector(selectSaveHallResponse);
   const creating = useAppSelector(selectCreateMaintenanceLoading);
   const createResponse = useAppSelector(selectCreateMaintenanceResponse);
+  const maintenance = useAppSelector(selectMaintenance) as Maint[] | undefined;
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -64,8 +68,12 @@ export function HallsPage() {
 
   useEffect(() => {
     dispatch(fetchHallsStart({ q }));
+    dispatch(fetchMaintenanceStart());
   }, [q, dispatch]);
-  useRealtime(['dashboard'], () => dispatch(fetchHallsStart({ q })));
+  useRealtime(['dashboard'], () => {
+    dispatch(fetchHallsStart({ q }));
+    dispatch(fetchMaintenanceStart());
+  });
 
   const resetSave = useCallback(() => dispatch(saveHallResponseResetStart()), [dispatch]);
   useReduxResponse(saveResponse, resetSave, () => {
@@ -79,6 +87,7 @@ export function HallsPage() {
     form.reset();
     setOpen(false);
     dispatch(fetchHallsStart({ q }));
+    dispatch(fetchMaintenanceStart());
   });
 
   const openScheduler = useCallback(
@@ -109,6 +118,15 @@ export function HallsPage() {
   const selectedHallName = useMemo(
     () => (data ?? []).find((h) => h.Id === selectedHallId)?.Name,
     [data, selectedHallId],
+  );
+
+  const windowsFor = useCallback(
+    (hall: Hall) =>
+      (maintenance ?? []).filter((item) => {
+        if (item.HallId) return String(item.HallId) === String(hall.Id);
+        return item.HallName === hall.Name;
+      }),
+    [maintenance],
   );
 
   return (
@@ -193,6 +211,35 @@ export function HallsPage() {
                         Window
                       </GhostButton>
                     ) : null}
+                    {can('halls.update') ? (
+                      <Link to={`/halls/${h.Id}/edit`} className="shrink-0">
+                        <GhostButton type="button" className="px-3 py-2">
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </GhostButton>
+                      </Link>
+                    ) : null}
+                  </div>
+                ) : null}
+                {h.Status === 'MAINTENANCE' ? (
+                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5">
+                    <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-800">
+                      Maintenance
+                    </p>
+                    {windowsFor(h).length ? (
+                      <ul className="space-y-1.5">
+                        {windowsFor(h).map((item) => (
+                          <li key={item.Id} className="text-xs text-navy-800/75">
+                            <span className="font-semibold text-navy-900">{item.Title}</span>
+                            <span className="block text-navy-800/55">
+                              {fmtDateTime(item.StartAt)} – {fmtDateTime(item.EndAt)} · {maintenanceDuration(item.StartAt, item.EndAt)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-navy-800/55">No window scheduled yet.</p>
+                    )}
                   </div>
                 ) : null}
               </div>
