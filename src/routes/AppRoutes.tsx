@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
 import { GuestLayout } from '../layouts/GuestLayout';
 import { LoginPage } from '../pages/login/LoginPage';
+import { PortalAuthPage } from '../pages/login/PortalAuthPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { HallsPage } from '../pages/hall/HallsPage';
 import { HallFormPage } from '../pages/hall/HallFormPage';
@@ -43,6 +44,7 @@ export function AppRoutes() {
     <Routes>
       <Route element={<GuestLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/portal" element={<PortalAuthPage />} />
       </Route>
       <Route path="/display/:hallCode" element={<DisplayPage />} />
       <Route element={<EncodeDecodeGate />}>

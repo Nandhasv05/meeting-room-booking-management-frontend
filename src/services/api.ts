@@ -16,6 +16,14 @@ export const api = axios.create({
   timeout: 20_000,
 });
 
+function liveApiUrl(): string {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname || '';
+    if (path === '/Meeting' || path.startsWith('/Meeting/')) return '/Meeting/api';
+  }
+  return API_URL;
+}
+
 function shouldSkipCrypto(config: AxiosRequestConfig): boolean {
   if (config.skipCrypto) return true;
   if (config.responseType === 'blob' || config.responseType === 'arraybuffer') return true;
@@ -66,6 +74,7 @@ function decryptEnvelope(body: unknown): ApiEnvelope<unknown> | null {
 }
 
 api.interceptors.request.use((config) => {
+  config.baseURL = liveApiUrl();
   const token = store.getState().auth.accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return encryptRequest(config);
@@ -77,7 +86,7 @@ async function refreshSession(): Promise<string | null> {
   const refreshToken = store.getState().auth.refreshToken;
   if (!refreshToken) return null;
   const requestToken = encryptDataV2({ refreshToken }, API_CRYPTO_KEY);
-  const { data } = await axios.post(`${API_URL}/auth/refresh`, { requestToken });
+  const { data } = await axios.post(`${liveApiUrl()}/auth/refresh`, { requestToken });
   const next = decryptEnvelope(data)?.data as { accessToken: string; refreshToken: string } | null;
   if (!next?.accessToken) {
     store.dispatch(clearSession());

@@ -5,13 +5,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import { hideBootSplash } from './components/ui/Activity';
+import { appBasename } from './utils/baseUrl';
 import App from './App';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename={appBasename()}>
         <App />
         <Toaster
           position="top-right"

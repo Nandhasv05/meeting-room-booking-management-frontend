@@ -11,7 +11,8 @@ import { PORTAL_LOGIN_URL } from '../../redux/const';
 import { LogoSpinner } from '../brand/LogoSpinner';
 
 export function readSsoTicket(search: string): string {
-  return new URLSearchParams(search).get('sso')?.trim() || '';
+  const q = new URLSearchParams(search);
+  return (q.get('sso') || q.get('token') || '').trim();
 }
 
 export function isLocalHost(): boolean {
@@ -25,6 +26,7 @@ export function goToPortalLogin() {
 function stripSsoFromUrl() {
   const url = new URL(window.location.href);
   url.searchParams.delete('sso');
+  url.searchParams.delete('token');
   const next = `${url.pathname}${url.search}${url.hash}`;
   window.history.replaceState({}, '', next);
 }

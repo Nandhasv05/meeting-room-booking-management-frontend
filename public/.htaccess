@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /Meeting/
+
+# Forward API to Node via PHP if Apache ProxyPass is not enabled
+RewriteRule ^api(?:/(.*))?$ api-proxy.php?mh_path=$1 [QSA,L]
+RewriteRule ^uploads(?:/(.*))?$ - [L]
+RewriteRule ^socket\.io(/|$) - [L]
+RewriteRule ^api-proxy\.php$ - [L]
+
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /Meeting/index.html [L]
