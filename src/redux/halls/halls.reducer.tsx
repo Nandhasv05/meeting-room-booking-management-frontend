@@ -15,7 +15,9 @@ const INITIAL_STATE: any = {
 	'facilities': [],
 	'facilitiesLoading': false,
 	'createFacilityResponse': null,
-	'createFacilityLoading': false
+	'createFacilityLoading': false,
+	'hallAvailability': null,
+	'hallAvailabilityLoading': false
 };
 
 const hallsReducer = (state = INITIAL_STATE, action: any) => {
@@ -125,6 +127,27 @@ const hallsReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 				createFacilityResponse: null,
+			};
+		case hallsActionTypes.FETCH_HALL_AVAILABILITY_START:
+			return {
+				...state,
+				hallAvailabilityLoading: true,
+			};
+		case hallsActionTypes.FETCH_HALL_AVAILABILITY_SUCCESS:
+			return {
+				...state,
+				hallAvailabilityLoading: false,
+				hallAvailability: action.payload?.data ?? null,
+			};
+		case hallsActionTypes.FETCH_HALL_AVAILABILITY_FAILURE:
+			return {
+				...state,
+				hallAvailabilityLoading: false,
+				hallAvailability: null,
+			};
+		case hallsActionTypes.FETCH_HALL_AVAILABILITY_RESPONSE_CHANGED:
+			return {
+				...state,
 			};
 		default:
 			return state;

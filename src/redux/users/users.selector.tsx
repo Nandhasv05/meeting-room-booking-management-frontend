@@ -13,3 +13,5 @@ export const selectSearchResults = createSelector([selectSlice], (slice) => slic
 export const selectSearchLoading = createSelector([selectSlice], (slice) => slice.searchLoading);
 export const selectCreateUserResponse = createSelector([selectSlice], (slice) => slice.createUserResponse);
 export const selectCreateUserLoading = createSelector([selectSlice], (slice) => slice.createUserLoading);
+export const selectUpdateUserResponse = createSelector([selectSlice], (slice) => slice.updateUserResponse);
+export const selectUpdateUserLoading = createSelector([selectSlice], (slice) => slice.updateUserLoading);

@@ -34,5 +34,11 @@ const hallsActionTypes = {
 	CREATE_FACILITY_RESPONSE_RESET_START: 'create_facility_response_reset_start',
 	CREATE_FACILITY_RESPONSE_CHANGED: 'create_facility_response_changed',
 
+	FETCH_HALL_AVAILABILITY_START: 'fetch_hall_availability_start',
+	FETCH_HALL_AVAILABILITY_SUCCESS: 'fetch_hall_availability_success',
+	FETCH_HALL_AVAILABILITY_FAILURE: 'fetch_hall_availability_failure',
+	FETCH_HALL_AVAILABILITY_RESPONSE_RESET_START: 'fetch_hall_availability_response_reset_start',
+	FETCH_HALL_AVAILABILITY_RESPONSE_CHANGED: 'fetch_hall_availability_response_changed',
+
 };
 export default hallsActionTypes;

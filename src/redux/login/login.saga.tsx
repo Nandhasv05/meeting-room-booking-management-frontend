@@ -5,7 +5,7 @@
 
 import { takeLatest, put, all, call } from 'redux-saga/effects';
 import { loginActionTypes } from './login.types';
-import { userSignIn, userSignOut } from './login.services';
+import { userSignIn, userSignOut, userPortalSso } from './login.services';
 import {
 	userSignInSuccess,
 	userSignInFailure,
@@ -23,8 +23,16 @@ export function* makeUserLoginReset() {
 	yield put(userSignInResponseChanged());
 }
 
+export function* signInWithPortalSso({ payload }: any) {
+	yield* invokeApi(userPortalSso, payload?.sso, userSignInSuccess, userSignInFailure);
+}
+
 export function* onUserSignInStart() {
 	yield takeLatest(loginActionTypes.USER_SIGN_IN_START, signInWithCredentials);
+}
+
+export function* onUserSsoStart() {
+	yield takeLatest(loginActionTypes.USER_SSO_START, signInWithPortalSso);
 }
 
 export function* onPhoneSignInReset() {
@@ -49,5 +57,5 @@ export function* userSignInLogout() {
 
 /******* LOGIN SAGA *******/
 export function* loginSaga() {
-	yield all([call(onUserSignInStart), call(userSignInLogout), call(onPhoneSignInReset)]);
+	yield all([call(onUserSignInStart), call(onUserSsoStart), call(userSignInLogout), call(onPhoneSignInReset)]);
 }

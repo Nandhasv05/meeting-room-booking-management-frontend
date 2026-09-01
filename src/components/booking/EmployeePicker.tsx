@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, UserPlus, X } from 'lucide-react';
 import { useDebounced } from '../../hooks/useAvailability';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { searchUsersStart } from '../../redux/users/users.action';
 import { selectSearchLoading, selectSearchResults } from '../../redux/users/users.selector';
+import { selectCurrentUser } from '../../redux/login/login.selector';
+import { listContacts, type SavedContact } from '../../helpers/contact/contactStore';
 
 export type Employee = {
   Id: string;
@@ -44,14 +47,51 @@ export function EmployeePicker({
   const q = useDebounced(term, 300);
   const inline = variant === 'inline';
   const dispatch = useAppDispatch();
+  const signedIn = useAppSelector(selectCurrentUser);
   const data = useAppSelector(selectSearchResults) as Employee[] | undefined;
   const isFetching = useAppSelector(selectSearchLoading);
+  const [saved, setSaved] = useState<SavedContact[]>([]);
+
+  useEffect(() => {
+    if (!signedIn?.id) {
+      setSaved([]);
+      return;
+    }
+    let cancelled = false;
+    void listContacts()
+      .then((rows) => {
+        if (!cancelled) setSaved(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSaved([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn?.id]);
 
   useEffect(() => {
     if (q.trim().length >= 2) dispatch(searchUsersStart({ q }));
   }, [q, dispatch]);
 
-  const results = (data ?? []).filter((e) => !selected.some((s) => s.id === e.Id));
+  const directory = (data ?? [])
+    .filter((e) => !selected.some((s) => s.id === e.Id || s.email.toLowerCase() === e.Email.toLowerCase()))
+    .map((e) => ({
+      id: e.Id,
+      name: `${e.FirstName} ${e.LastName}`.trim(),
+      email: e.Email,
+      hint: `${e.EmployeeId} · ${e.DepartmentName ?? 'No department'}`,
+    }));
+
+  const book = saved
+    .filter((c) => {
+      const hay = `${c.name} ${c.email}`.toLowerCase();
+      return q.trim().length >= 2 && hay.includes(q.trim().toLowerCase());
+    })
+    .filter((c) => !selected.some((s) => s.email.toLowerCase() === c.email.toLowerCase()))
+    .map((c) => ({ id: `guest:${c.email}`, name: c.name, email: c.email, hint: 'Saved contact' }));
+
+  const results = [...directory, ...book.filter((c) => !directory.some((d) => d.email.toLowerCase() === c.email.toLowerCase()))];
 
   return (
     <div>
@@ -85,29 +125,31 @@ export function EmployeePicker({
               {isFetching && !results.length ? (
                 <p className="px-4 py-3 text-sm text-navy-800/50">Searching…</p>
               ) : !results.length ? (
-                <p className="px-4 py-3 text-sm text-navy-800/50">No matching employees.</p>
+                <div className="px-4 py-3">
+                  <p className="text-sm text-navy-800/50">No matching people.</p>
+                  <Link to="/contacts" className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline">
+                    <UserPlus className="h-4 w-4" />
+                    Open Contact page
+                  </Link>
+                </div>
               ) : (
                 results.map((e) => (
                   <button
-                    key={e.Id}
+                    key={e.id}
                     type="button"
                     className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition hover:bg-brand-50"
                     onClick={() => {
-                      onAdd({ id: e.Id, name: `${e.FirstName} ${e.LastName}`.trim(), email: e.Email });
+                      onAdd({ id: e.id, name: e.name, email: e.email });
                       setTerm('');
                       setOpen(false);
                     }}
                   >
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-100 text-[11px] font-bold text-brand-600">
-                      {initialsOf(`${e.FirstName} ${e.LastName}`)}
+                      {initialsOf(e.name)}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-navy-900">
-                        {e.FirstName} {e.LastName}
-                      </span>
-                      <span className="block truncate text-xs text-navy-800/50">
-                        {e.EmployeeId} · {e.DepartmentName ?? 'No department'}
-                      </span>
+                      <span className="block truncate text-sm font-semibold text-navy-900">{e.name}</span>
+                      <span className="block truncate text-xs text-navy-800/50">{e.hint}</span>
                     </span>
                     <UserPlus className="h-4 w-4 shrink-0 text-navy-800/30" />
                   </button>
@@ -138,6 +180,9 @@ export function EmployeePicker({
                   {initialsOf(s.name)}
                 </span>
                 <span className={`font-medium ${busy ? 'text-rose-900' : 'text-navy-900'}`}>{s.name}</span>
+                {s.id.startsWith('guest:') ? (
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-navy-800/45">guest</span>
+                ) : null}
                 {busy ? <span className="text-[10px] font-bold uppercase tracking-wide text-rose-700">busy</span> : null}
                 <button
                   type="button"

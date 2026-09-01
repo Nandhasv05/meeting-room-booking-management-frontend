@@ -18,6 +18,7 @@ const tones: Record<string, string> = {
   DRAFT: 'bg-stone-100 text-navy-700 ring-navy-800/10',
   ACTIVE: 'bg-signal/12 text-signal ring-signal/20',
   DISABLED: 'bg-stone-200 text-navy-700 ring-navy-800/10',
+  SCHEDULED: 'bg-brand-50 text-brand-700 ring-brand-400/20',
 };
 
 export function StatusBadge({ value }: { value: string }) {

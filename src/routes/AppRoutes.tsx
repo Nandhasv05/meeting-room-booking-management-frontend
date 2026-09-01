@@ -24,17 +24,20 @@ import { AuditPage } from '../pages/audit/AuditPage';
 import { MaintenancePage } from '../pages/setting/MaintenancePage';
 import { FacilitiesPage } from '../pages/hall/FacilitiesPage';
 import { NotificationsPage } from '../pages/setting/NotificationsPage';
+import { ContactsPage } from '../pages/contact/ContactsPage';
 import { NotFoundPage } from '../pages/error/NotFoundPage';
 import { isAdminRole } from '../utils/roles';
 import { useAppSelector } from '../store';
 import { EncodeDecodeGate, RequireAdmin } from './guards';
 
+// Home redirect for the application
 function HomeRedirect() {
   const code = useAppSelector((s) => s.auth.user?.roleCode);
   if (isAdminRole(code)) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/calendar" replace />;
 }
 
+// App routes for the application
 export function AppRoutes() {
   return (
     <Routes>
@@ -53,12 +56,12 @@ export function AppRoutes() {
         <Route path="/Calendar" element={<CalendarPage />} />
         <Route path="/Displays" element={<DisplaysIndexPage />} />
         <Route path="/Notifications" element={<NotificationsPage />} />
+        <Route path="/Contacts" element={<ContactsPage />} />
+        <Route path="/Halls" element={<HallsPage />} />
         <Route element={<RequireAdmin />}>
           <Route path="/Dashboard" element={<DashboardPage />} />
-          <Route path="/Halls" element={<HallsPage />} />
           <Route path="/Halls/Facilities" element={<FacilitiesPage />} />
           <Route path="/Halls/New" element={<HallFormPage />} />
-          <Route path="/Halls/:id" element={<HallDetailPage />} />
           <Route path="/Halls/:id/Edit" element={<HallFormPage />} />
           <Route path="/Events" element={<EventsPage />} />
           <Route path="/Events/:id" element={<EventDetailPage />} />
@@ -71,6 +74,7 @@ export function AppRoutes() {
           <Route path="/Admin/audit" element={<AuditPage />} />
           <Route path="/Admin/maintenance" element={<MaintenancePage />} />
         </Route>
+        <Route path="/Halls/:id" element={<HallDetailPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

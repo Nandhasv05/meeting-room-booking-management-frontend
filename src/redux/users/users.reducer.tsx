@@ -11,7 +11,9 @@ const INITIAL_STATE: any = {
 	'searchResults': [],
 	'searchLoading': false,
 	'createUserResponse': null,
-	'createUserLoading': false
+	'createUserLoading': false,
+	'updateUserResponse': null,
+	'updateUserLoading': false
 };
 
 const usersReducer = (state = INITIAL_STATE, action: any) => {
@@ -78,6 +80,28 @@ const usersReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 				createUserResponse: null,
+			};
+		case usersActionTypes.UPDATE_USER_START:
+			return {
+				...state,
+				updateUserLoading: true,
+			};
+		case usersActionTypes.UPDATE_USER_SUCCESS:
+			return {
+				...state,
+				updateUserLoading: false,
+				updateUserResponse: action.payload,
+			};
+		case usersActionTypes.UPDATE_USER_FAILURE:
+			return {
+				...state,
+				updateUserLoading: false,
+				updateUserResponse: action.payload,
+			};
+		case usersActionTypes.UPDATE_USER_RESPONSE_CHANGED:
+			return {
+				...state,
+				updateUserResponse: null,
 			};
 		default:
 			return state;

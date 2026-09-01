@@ -11,6 +11,11 @@ export const userSignInStart = (userCredentials: any) => ({
 	payload: userCredentials,
 });
 
+export const userSsoStart = (sso: string) => ({
+	type: loginActionTypes.USER_SSO_START,
+	payload: { sso },
+});
+
 export const userSignInSuccess = (user: any) => ({
 	type: loginActionTypes.USER_SIGN_IN_SUCCESS,
 	payload: user,

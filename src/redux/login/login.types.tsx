@@ -10,6 +10,7 @@ export const loginActionTypes = {
 	USER_SIGN_IN_FAILURE: 'user_sign_in_failure',
 	USER_SIGN_IN_RESPONSE_RESET_START: 'user_sign_in_response_reset_start',
 	USER_SIGN_IN_RESPONSE_CHANGED: 'user_sign_in_response_changed',
+	USER_SSO_START: 'user_sso_start',
     /*******  USER SIGN IN END*******/
 
 	/******* SET SESSION START*******/

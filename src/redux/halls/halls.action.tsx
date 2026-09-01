@@ -119,3 +119,26 @@ export const createFacilityResponseResetStart = () => ({
 export const createFacilityResponseChanged = () => ({
 	type: hallsActionTypes.CREATE_FACILITY_RESPONSE_CHANGED,
 });
+
+export const fetchHallAvailabilityStart = (payload?: any) => ({
+	type: hallsActionTypes.FETCH_HALL_AVAILABILITY_START,
+	payload,
+});
+
+export const fetchHallAvailabilitySuccess = (payload: any) => ({
+	type: hallsActionTypes.FETCH_HALL_AVAILABILITY_SUCCESS,
+	payload,
+});
+
+export const fetchHallAvailabilityFailure = (payload: any) => ({
+	type: hallsActionTypes.FETCH_HALL_AVAILABILITY_FAILURE,
+	payload,
+});
+
+export const fetchHallAvailabilityResponseResetStart = () => ({
+	type: hallsActionTypes.FETCH_HALL_AVAILABILITY_RESPONSE_RESET_START,
+});
+
+export const fetchHallAvailabilityResponseChanged = () => ({
+	type: hallsActionTypes.FETCH_HALL_AVAILABILITY_RESPONSE_CHANGED,
+});

@@ -2,7 +2,6 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : Root saga
-
 import { all, call } from 'redux-saga/effects';
 import { loginSaga } from './login/login.saga';
 import { hallsSaga } from './halls/halls.saga';
@@ -21,6 +20,7 @@ import { maintenanceSaga } from './maintenance/maintenance.saga';
 import { displaySaga } from './display/display.saga';
 import { availabilitySaga } from './availability/availability.saga';
 
+// Root saga for the application
 export function* rootSaga() {
 	yield all([
 		call(loginSaga),

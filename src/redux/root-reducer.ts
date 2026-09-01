@@ -2,7 +2,6 @@
 // Author : NANDHAKUMAR S V
 // Date : 27/08/2026
 // Description : Root reducer for the Meeting Hall app
-
 import { combineReducers } from '@reduxjs/toolkit';
 import loginReducer from './login/login.reducer';
 import hallsReducer from './halls/halls.reducer';
@@ -21,6 +20,7 @@ import maintenanceReducer from './maintenance/maintenance.reducer';
 import displayReducer from './display/display.reducer';
 import availabilityReducer from './availability/availability.reducer';
 
+// Root reducer for the application
 const rootReducer = combineReducers({
 	auth: loginReducer,
 	halls: hallsReducer,
@@ -40,5 +40,8 @@ const rootReducer = combineReducers({
 	availability: availabilityReducer,
 });
 
+// Type for the root state
 export type RootState = ReturnType<typeof rootReducer>;
+
+// Export the root reducer
 export default rootReducer;

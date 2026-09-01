@@ -17,3 +17,5 @@ export const selectFacilities = createSelector([selectSlice], (slice) => slice.f
 export const selectFacilitiesLoading = createSelector([selectSlice], (slice) => slice.facilitiesLoading);
 export const selectCreateFacilityResponse = createSelector([selectSlice], (slice) => slice.createFacilityResponse);
 export const selectCreateFacilityLoading = createSelector([selectSlice], (slice) => slice.createFacilityLoading);
+export const selectHallAvailability = createSelector([selectSlice], (slice) => slice.hallAvailability);
+export const selectHallAvailabilityLoading = createSelector([selectSlice], (slice) => slice.hallAvailabilityLoading);

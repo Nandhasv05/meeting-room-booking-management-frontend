@@ -1,5 +1,5 @@
-import { Bell, LogOut, Menu } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Home, LogOut, Menu } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { userSignInLogOutStart, useAppDispatch, useAppSelector } from '../../store';
@@ -7,8 +7,10 @@ import { useShell } from './ShellContext';
 import { fetchNotificationsStart } from '../../redux/notifications/notifications.action';
 import { selectNotifications } from '../../redux/notifications/notifications.selector';
 import { selectCurrentUser } from '../../redux/login/login.selector';
+import { PORTAL_HOME_URL } from '../../redux/const';
 
 const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
+  { match: /^\/contacts/, title: 'Contact' },
   { match: /^\/bookings\/new/, title: 'New booking' },
   { match: /^\/bookings\/[^/]+/, title: 'Booking detail' },
   { match: /^\/bookings/, title: 'My bookings' },
@@ -23,7 +25,7 @@ const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/displays/, title: 'Displays' },
   { match: /^\/reports/, title: 'Reports' },
   { match: /^\/notifications/, title: 'Notifications' },
-  { match: /^\/admin\/users/, title: 'Users' },
+  { match: /^\/admin\/users/, title: 'Users & roles' },
   { match: /^\/admin\/roles/, title: 'Roles' },
   { match: /^\/admin\/departments/, title: 'Departments' },
   { match: /^\/admin\/settings/, title: 'Settings' },
@@ -65,7 +67,6 @@ function initials(first?: string, last?: string) {
 export function Topbar() {
   const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const location = useLocation();
   const { toggleNav } = useShell();
   const [now, setNow] = useState(() => new Date());
@@ -118,7 +119,7 @@ export function Topbar() {
   const signOut = () => {
     setMenuOpen(false);
     dispatch(userSignInLogOutStart());
-    navigate('/login', { replace: true });
+    window.location.assign(PORTAL_HOME_URL);
   };
 
   return (
@@ -133,6 +134,14 @@ export function Topbar() {
         >
           <Menu size={18} />
         </button>
+        <a
+          href={PORTAL_HOME_URL}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-navy-800/10 bg-white/70 text-navy-900 transition hover:border-brand-400/40 hover:bg-brand-50"
+          aria-label="EVOLV portal home"
+          title="Home"
+        >
+          <Home size={16} />
+        </a>
         <h1 className="truncate font-display text-base font-semibold tracking-tight text-navy-900 sm:text-lg">
           {title}
         </h1>
@@ -200,10 +209,18 @@ export function Topbar() {
                       </p>
                       <p className="mt-1 text-[11px] tabular-nums text-navy-800/50 sm:hidden">{formatClock(now)}</p>
                     </div>
+                    <a
+                      href={PORTAL_HOME_URL}
+                      role="menuitem"
+                      className="mt-1 flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm font-medium text-navy-800 transition hover:bg-brand-50"
+                    >
+                      <Home size={14} />
+                      Home
+                    </a>
                     <button
                       type="button"
                       role="menuitem"
-                      className="mt-1 flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm font-medium text-navy-800 transition hover:bg-brand-50"
+                      className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm font-medium text-navy-800 transition hover:bg-brand-50"
                       onClick={signOut}
                     >
                       <LogOut size={14} />

@@ -1,19 +1,44 @@
 // AUTHOR : NANDNHAKUMAR SV
 // DATE : 28/08/2026
 // DESCRIPTION : Setting validation schema
-import { isToday, isYesterday } from 'date-fns';
+import { differenceInMinutes, isToday, isYesterday } from 'date-fns';
 import { z } from 'zod';
 import { fmtDateTime, parseAppDate } from '@/utils/format';
 
 /******* TYPES *******/
 export type Maint = {
   Id: string;
+  HallId?: string;
   HallName: string;
+  HallCode?: string;
   Title: string;
+  Description?: string | null;
   StartAt: string;
   EndAt: string;
   Status: string;
 };
+
+export type MaintPhase = 'active' | 'upcoming' | 'past';
+
+export function maintenancePhase(m: Maint): MaintPhase {
+  const start = parseAppDate(m.StartAt);
+  const end = parseAppDate(m.EndAt);
+  const now = new Date();
+  const closed = m.Status === 'COMPLETED' || m.Status === 'CANCELLED';
+  if (closed || Number.isNaN(end.getTime()) || end.getTime() <= now.getTime()) return 'past';
+  if (m.Status === 'ONGOING' || m.Status === 'ACTIVE' || (start.getTime() <= now.getTime() && end.getTime() > now.getTime())) {
+    return 'active';
+  }
+  return 'upcoming';
+}
+
+export function maintenanceDuration(startAt: string, endAt: string) {
+  const mins = Math.max(0, differenceInMinutes(parseAppDate(endAt), parseAppDate(startAt)));
+  if (mins < 60) return `${mins} min`;
+  const hours = Math.floor(mins / 60);
+  const rest = mins % 60;
+  return rest ? `${hours}h ${rest}m` : `${hours}h`;
+}
 
 /******* SCHEMA *******/
 export const schema = z.object({

@@ -30,6 +30,7 @@ const loginReducer = (state = INITIAL_STATE, action: any) => {
 	switch (action.type) {
 		/******* USER SIGN IN START *******/
 		case loginActionTypes.USER_SIGN_IN_START:
+		case loginActionTypes.USER_SSO_START:
 			return {
 				...state,
 				loginLoading: true,

@@ -9,6 +9,7 @@ import {
 	fetchUsersCall,
 	searchUsersCall,
 	createUserCall,
+	updateUserCall,
 } from './users.services';
 import {
 	fetchUsersSuccess,
@@ -20,6 +21,9 @@ import {
 	createUserSuccess,
 	createUserFailure,
 	createUserResponseChanged,
+	updateUserSuccess,
+	updateUserFailure,
+	updateUserResponseChanged,
 } from './users.action';
 import { invokeApi } from '../_common/saga.utils';
 
@@ -71,6 +75,31 @@ function* onCreateUserReset() {
 	yield takeLatest(usersActionTypes.CREATE_USER_RESPONSE_RESET_START, createUserReset);
 }
 
+function* updateUserDetails({ payload }: any) {
+	yield* invokeApi(updateUserCall, payload, updateUserSuccess, updateUserFailure);
+}
+
+function* updateUserReset() {
+	yield put(updateUserResponseChanged());
+}
+
+function* onUpdateUserStart() {
+	yield takeLatest(usersActionTypes.UPDATE_USER_START, updateUserDetails);
+}
+
+function* onUpdateUserReset() {
+	yield takeLatest(usersActionTypes.UPDATE_USER_RESPONSE_RESET_START, updateUserReset);
+}
+
 export function* usersSaga() {
-	yield all([call(onFetchUsersStart), call(onFetchUsersReset), call(onSearchUsersStart), call(onSearchUsersReset), call(onCreateUserStart), call(onCreateUserReset)]);
+	yield all([
+		call(onFetchUsersStart),
+		call(onFetchUsersReset),
+		call(onSearchUsersStart),
+		call(onSearchUsersReset),
+		call(onCreateUserStart),
+		call(onCreateUserReset),
+		call(onUpdateUserStart),
+		call(onUpdateUserReset),
+	]);
 }

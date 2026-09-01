@@ -73,19 +73,19 @@ export const skins: Record<DisplayPayload['state'], string> = {
       mm,
       ss,
       suffix,
-      date: d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
+      date: d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }),
     };
   }
 
   export const haloWord: Record<DisplayPayload['state'], string> = {
-    AVAILABLE: 'FREE',
+    AVAILABLE: 'AVAILABLE',
     UPCOMING: 'SOON',
     ONGOING: 'LIVE',
     MAINTENANCE: 'HOLD',
   };
 
   export const watermarkWord: Record<DisplayPayload['state'], string> = {
-    AVAILABLE: 'OPEN',
+    AVAILABLE: 'AVAILABLE',
     UPCOMING: 'SOON',
     ONGOING: 'BUSY',
     MAINTENANCE: 'HOLD',

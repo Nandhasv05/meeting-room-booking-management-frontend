@@ -10,6 +10,11 @@ export const userSignIn = (loginData: { email: string; password: string }) => {
 	return makeApiCall('/auth/login', loginData);
 };
 
+/******* PORTAL SSO *******/
+export const userPortalSso = (sso: string) => {
+	return makeApiCall('/auth/sso', { sso });
+};
+
 /******* USER SIGN OUT *******/
 export const userSignOut = () => {
 	return makeApiCall('/auth/logout', {});
