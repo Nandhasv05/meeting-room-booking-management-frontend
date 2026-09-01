@@ -1,7 +1,7 @@
 <?php
 /**
  * Fallback proxy when Apache ProxyPass is not enabled.
- * Forwards /Meeting/api-proxy.php/<path> to Node at 127.0.0.1:5000/api/<path>
+ * Forwards /Meeting/api to Node at 127.0.0.1:5000/api
  */
 declare(strict_types=1);
 
@@ -26,15 +26,51 @@ if ($query !== '') {
     $url .= '?' . $query;
 }
 
+function mhRequestHeader(string $name): string {
+    $candidates = [];
+    if (function_exists('getallheaders')) {
+        foreach (getallheaders() as $key => $value) {
+            if (strcasecmp((string) $key, $name) === 0) {
+                $candidates[] = (string) $value;
+            }
+        }
+    }
+    if (function_exists('apache_request_headers')) {
+        foreach (apache_request_headers() as $key => $value) {
+            if (strcasecmp((string) $key, $name) === 0) {
+                $candidates[] = (string) $value;
+            }
+        }
+    }
+    $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+    foreach ([$serverKey, 'REDIRECT_' . $serverKey] as $key) {
+        if (!empty($_SERVER[$key])) {
+            $candidates[] = (string) $_SERVER[$key];
+        }
+    }
+    if (strcasecmp($name, 'Authorization') === 0) {
+        foreach (['HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'Authorization'] as $key) {
+            if (!empty($_SERVER[$key])) {
+                $candidates[] = (string) $_SERVER[$key];
+            }
+        }
+    }
+    if (strcasecmp($name, 'Content-Type') === 0 && !empty($_SERVER['CONTENT_TYPE'])) {
+        $candidates[] = (string) $_SERVER['CONTENT_TYPE'];
+    }
+    foreach ($candidates as $value) {
+        if (trim($value) !== '') {
+            return $value;
+        }
+    }
+    return '';
+}
+
 $headers = [];
 foreach (['Authorization', 'Content-Type', 'Accept', 'X-Requested-With'] as $name) {
-    $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
-    if ($name === 'Content-Type' && !empty($_SERVER['CONTENT_TYPE'])) {
-        $headers[] = 'Content-Type: ' . $_SERVER['CONTENT_TYPE'];
-        continue;
-    }
-    if (!empty($_SERVER[$serverKey])) {
-        $headers[] = $name . ': ' . $_SERVER[$serverKey];
+    $value = mhRequestHeader($name);
+    if ($value !== '') {
+        $headers[] = $name . ': ' . $value;
     }
 }
 

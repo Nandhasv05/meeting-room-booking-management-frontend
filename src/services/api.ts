@@ -85,21 +85,26 @@ let refreshing: Promise<string | null> | null = null;
 async function refreshSession(): Promise<string | null> {
   const refreshToken = store.getState().auth.refreshToken;
   if (!refreshToken) return null;
-  const requestToken = encryptDataV2({ refreshToken }, API_CRYPTO_KEY);
-  const { data } = await axios.post(`${liveApiUrl()}/auth/refresh`, { requestToken });
-  const next = decryptEnvelope(data)?.data as { accessToken: string; refreshToken: string } | null;
-  if (!next?.accessToken) {
+  try {
+    const requestToken = encryptDataV2({ refreshToken }, API_CRYPTO_KEY);
+    const { data } = await axios.post(`${liveApiUrl()}/auth/refresh`, { requestToken });
+    const next = decryptEnvelope(data)?.data as { accessToken: string; refreshToken: string } | null;
+    if (!next?.accessToken) {
+      store.dispatch(clearSession());
+      return null;
+    }
+    store.dispatch(
+      setSession({
+        user: store.getState().auth.user,
+        accessToken: next.accessToken,
+        refreshToken: next.refreshToken,
+      }),
+    );
+    return next.accessToken;
+  } catch {
     store.dispatch(clearSession());
     return null;
   }
-  store.dispatch(
-    setSession({
-      user: store.getState().auth.user,
-      accessToken: next.accessToken,
-      refreshToken: next.refreshToken,
-    }),
-  );
-  return next.accessToken;
 }
 
 api.interceptors.response.use(
@@ -117,10 +122,11 @@ api.interceptors.response.use(
       const unwrapped = decryptEnvelope(error.response.data);
       if (unwrapped) error.response.data = unwrapped as ApiEnvelope<null>;
     }
-    const original = error.config;
-    if (!original || error.response?.status !== 401 || original.url?.includes('/auth/')) {
+    const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    if (!original || error.response?.status !== 401 || original.url?.includes('/auth/') || original._retry) {
       return Promise.reject(error);
     }
+    original._retry = true;
     if (!refreshing) {
       refreshing = refreshSession().finally(() => {
         refreshing = null;

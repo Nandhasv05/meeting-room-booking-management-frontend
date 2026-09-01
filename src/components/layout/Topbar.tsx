@@ -31,7 +31,6 @@ const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/admin\/settings/, title: 'Settings' },
   { match: /^\/admin\/encode-decode/, title: 'Encode / Decode' },
   { match: /^\/admin\/audit/, title: 'Audit logs' },
-  { match: /^\/admin\/maintenance/, title: 'Maintenance' },
 ];
 
 function pageTitle(pathname: string): string {

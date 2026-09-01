@@ -1,24 +1,34 @@
 // AUTHOR : NANDNHAKUMAR SV
 // DATE : 01/09/2026
 // DESCRIPTION : Hall detail — full facts plus 7-day availability and bookings
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { addDays, format, startOfDay } from 'date-fns';
 import { CalendarPlus, ExternalLink, Pencil } from 'lucide-react';
 import type { Hall } from '../../types/api';
+import { hallStatusOptions } from '../../types/api';
 import { EmptyState, PageHeader, Spinner, StatusBadge } from '../../components/ui/Feedback';
-import { GhostButton, PrimaryButton } from '../../components/ui/Form';
+import { GhostButton, inputClass, PrimaryButton } from '../../components/ui/Form';
 import { Card, CardHeader, DataTable, DefinitionItem, type Column } from '../../components/ui/Surface';
 import { usePermission } from '../../hooks/usePermission';
 import { fmtDateTime, fmtTime, parseAppDate } from '../../utils/format';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { fetchHallAvailabilityStart, fetchHallStart } from '../../redux/halls/halls.action';
+import {
+  fetchHallAvailabilityStart,
+  fetchHallStart,
+  saveHallResponseResetStart,
+  saveHallStart,
+} from '../../redux/halls/halls.action';
 import {
   selectHall,
   selectHallAvailability,
   selectHallAvailabilityLoading,
   selectHallLoading,
+  selectSaveHallLoading,
+  selectSaveHallResponse,
 } from '../../redux/halls/halls.selector';
+import { useReduxResponse } from '../../redux/_common/useReduxResponse';
+import { celebrate } from '../../components/ui/SuccessFx';
 
 type AvailBooking = {
   Id: string;
@@ -99,6 +109,8 @@ export function HallDetailPage() {
   const isLoading = useAppSelector(selectHallLoading);
   const availability = useAppSelector(selectHallAvailability) as AvailPayload | null;
   const availLoading = useAppSelector(selectHallAvailabilityLoading);
+  const savePending = useAppSelector(selectSaveHallLoading);
+  const saveResponse = useAppSelector(selectSaveHallResponse);
   const [anchor, setAnchor] = useState(() => startOfDay(new Date()));
   const [selected, setSelected] = useState(() => startOfDay(new Date()));
 
@@ -113,6 +125,12 @@ export function HallDetailPage() {
     dispatch(fetchHallStart({ id }));
     dispatch(fetchHallAvailabilityStart({ id, from: range.from, to: range.to }));
   }, [id, dispatch, range.from, range.to]);
+
+  const resetSave = useCallback(() => dispatch(saveHallResponseResetStart()), [dispatch]);
+  useReduxResponse(saveResponse, resetSave, () => {
+    celebrate('Hall status updated', 'The conference hall is now showing the new status.');
+    if (id) dispatch(fetchHallStart({ id }));
+  });
 
   const bookings = availability?.bookings ?? [];
   const maintenance = availability?.maintenance ?? [];
@@ -197,7 +215,31 @@ export function HallDetailPage() {
             <DefinitionItem label="Floor" value={data.Floor || '—'} />
             <DefinitionItem label="Location" value={data.Location || '—'} />
             <DefinitionItem label="Hours" value={`${hoursLabel(data.OpeningTime)} – ${hoursLabel(data.ClosingTime)}`} />
-            <DefinitionItem label="Status" value={<StatusBadge value={data.Status} />} />
+            <DefinitionItem
+              label="Status"
+              value={
+                can('halls.update') ? (
+                  <select
+                    className={`${inputClass} py-1.5 text-xs font-semibold uppercase tracking-[0.08em]`}
+                    value={data.Status}
+                    disabled={savePending}
+                    aria-label="Hall status"
+                    onChange={(e) => {
+                      if (e.target.value === data.Status) return;
+                      dispatch(saveHallStart({ id: data.Id, status: e.target.value }));
+                    }}
+                  >
+                    {hallStatusOptions(data.Status).map((status) => (
+                      <option key={status} value={status}>
+                        {status.replaceAll('_', ' ')}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <StatusBadge value={data.Status} />
+                )
+              }
+            />
             <DefinitionItem label="Active" value={data.IsActive ? 'Yes' : 'No'} />
             <DefinitionItem label="Contact" value={data.ContactName || '—'} />
           </dl>

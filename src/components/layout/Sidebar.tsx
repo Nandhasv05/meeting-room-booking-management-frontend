@@ -89,7 +89,6 @@ function NavBody() {
           <Item to="/admin/users" label="Users & roles" icon={Users} />
           <Item to="/admin/roles" label="Roles" icon={Shield} />
           <Item to="/admin/departments" label="Departments" icon={Users} />
-          <Item to="/admin/maintenance" label="Maintenance" icon={Settings} />
           <Item to="/reports" label="Reports" icon={ChartBar} />
           <Item to="/admin/audit" label="Audit" icon={ClipboardList} />
         </Group>

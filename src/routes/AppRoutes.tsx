@@ -22,7 +22,6 @@ import { DepartmentsPage } from '../pages/department/DepartmentsPage';
 import { SettingsPage } from '../pages/setting/SettingsPage';
 import { EncodeDecodePage, EncodeDecodeStandalonePage } from '../pages/setting/EncodeDecodePage';
 import { AuditPage } from '../pages/audit/AuditPage';
-import { MaintenancePage } from '../pages/setting/MaintenancePage';
 import { FacilitiesPage } from '../pages/hall/FacilitiesPage';
 import { NotificationsPage } from '../pages/setting/NotificationsPage';
 import { ContactsPage } from '../pages/contact/ContactsPage';
@@ -52,6 +51,8 @@ export function AppRoutes() {
       </Route>
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomeRedirect />} />
+        <Route path="/admin/maintenance" element={<Navigate to="/halls" replace />} />
+        <Route path="/Admin/maintenance" element={<Navigate to="/halls" replace />} />
         <Route path="/Bookings/New" element={<BookingFormPage />} />
         <Route path="/Bookings" element={<MyBookingsPage />} />
         <Route path="/Bookings/:id" element={<BookingDetailPage />} />
@@ -74,7 +75,6 @@ export function AppRoutes() {
           <Route path="/Admin/settings" element={<SettingsPage />} />
           <Route path="/Admin/encode-decode" element={<EncodeDecodePage />} />
           <Route path="/Admin/audit" element={<AuditPage />} />
-          <Route path="/Admin/maintenance" element={<MaintenancePage />} />
         </Route>
         <Route path="/Halls/:id" element={<HallDetailPage />} />
       </Route>
