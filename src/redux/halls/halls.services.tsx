@@ -22,6 +22,11 @@ export const createFacilityCall = (payload?: any) => {
 	return makeApiCall('/facilities/create', payload);
 };
 
+export const fetchHallAvailabilityCall = (payload?: any) => {
+	const { id, ...body } = payload || {};
+	return makeApiCall(`/halls/${id}/availability`, body);
+};
+
 export const saveHallCall = (payload: any) => {
 	const { id, ...body } = payload || {};
 	return id ? makeApiCall(`/halls/${id}/update`, body) : makeApiCall('/halls/create', body);

@@ -73,3 +73,26 @@ export const createUserResponseResetStart = () => ({
 export const createUserResponseChanged = () => ({
 	type: usersActionTypes.CREATE_USER_RESPONSE_CHANGED,
 });
+
+export const updateUserStart = (payload?: any) => ({
+	type: usersActionTypes.UPDATE_USER_START,
+	payload,
+});
+
+export const updateUserSuccess = (payload: any) => ({
+	type: usersActionTypes.UPDATE_USER_SUCCESS,
+	payload,
+});
+
+export const updateUserFailure = (payload: any) => ({
+	type: usersActionTypes.UPDATE_USER_FAILURE,
+	payload,
+});
+
+export const updateUserResponseResetStart = () => ({
+	type: usersActionTypes.UPDATE_USER_RESPONSE_RESET_START,
+});
+
+export const updateUserResponseChanged = () => ({
+	type: usersActionTypes.UPDATE_USER_RESPONSE_CHANGED,
+});

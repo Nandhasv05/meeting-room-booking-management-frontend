@@ -11,6 +11,7 @@ import {
 	fetchFacilitiesCall,
 	createFacilityCall,
 	saveHallCall,
+	fetchHallAvailabilityCall,
 } from './halls.services';
 import {
 	fetchHallsSuccess,
@@ -28,6 +29,9 @@ import {
 	createFacilitySuccess,
 	createFacilityFailure,
 	createFacilityResponseChanged,
+	fetchHallAvailabilitySuccess,
+	fetchHallAvailabilityFailure,
+	fetchHallAvailabilityResponseChanged,
 } from './halls.action';
 import { invokeApi } from '../_common/saga.utils';
 
@@ -111,6 +115,35 @@ function* onCreateFacilityReset() {
 	yield takeLatest(hallsActionTypes.CREATE_FACILITY_RESPONSE_RESET_START, createFacilityReset);
 }
 
+function* fetchHallAvailabilityDetails({ payload }: any) {
+	yield* invokeApi(fetchHallAvailabilityCall, payload, fetchHallAvailabilitySuccess, fetchHallAvailabilityFailure);
+}
+
+function* fetchHallAvailabilityReset() {
+	yield put(fetchHallAvailabilityResponseChanged());
+}
+
+function* onFetchHallAvailabilityStart() {
+	yield takeLatest(hallsActionTypes.FETCH_HALL_AVAILABILITY_START, fetchHallAvailabilityDetails);
+}
+
+function* onFetchHallAvailabilityReset() {
+	yield takeLatest(hallsActionTypes.FETCH_HALL_AVAILABILITY_RESPONSE_RESET_START, fetchHallAvailabilityReset);
+}
+
 export function* hallsSaga() {
-	yield all([call(onFetchHallsStart), call(onFetchHallsReset), call(onFetchHallStart), call(onFetchHallReset), call(onSaveHallStart), call(onSaveHallReset), call(onFetchFacilitiesStart), call(onFetchFacilitiesReset), call(onCreateFacilityStart), call(onCreateFacilityReset)]);
+	yield all([
+		call(onFetchHallsStart),
+		call(onFetchHallsReset),
+		call(onFetchHallStart),
+		call(onFetchHallReset),
+		call(onSaveHallStart),
+		call(onSaveHallReset),
+		call(onFetchFacilitiesStart),
+		call(onFetchFacilitiesReset),
+		call(onCreateFacilityStart),
+		call(onCreateFacilityReset),
+		call(onFetchHallAvailabilityStart),
+		call(onFetchHallAvailabilityReset),
+	]);
 }

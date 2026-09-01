@@ -105,3 +105,15 @@ export const EVENT_TYPES = [
 ] as const;
 
 export const HALL_TYPES = ['BOARDROOM', 'AUDITORIUM', 'TRAINING', 'MEETING', 'MULTIPURPOSE', 'CONFERENCE'] as const;
+
+export const HALL_STATUSES = ['AVAILABLE', 'BOOKED', 'OCCUPIED', 'MAINTENANCE', 'BLOCKED'] as const;
+
+export type HallStatus = (typeof HALL_STATUSES)[number];
+
+export const EDITABLE_HALL_STATUSES = ['AVAILABLE', 'MAINTENANCE', 'BLOCKED'] as const;
+
+export function hallStatusOptions(current: string) {
+  const set = new Set<string>(EDITABLE_HALL_STATUSES);
+  if (current) set.add(current);
+  return [...set];
+}

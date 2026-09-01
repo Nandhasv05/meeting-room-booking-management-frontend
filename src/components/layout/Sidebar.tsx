@@ -1,3 +1,7 @@
+// DATE : 01/09/2026
+// DESCRIPTION : Sidebar component
+// Author : NANDHAKUMAR S V
+// Version : 0.0.1
 import { NavLink } from 'react-router-dom';
 import {
   CalendarDays,
@@ -5,14 +9,13 @@ import {
   ClipboardList,
   Users,
   Monitor,
-  BarChart3,
   Settings,
   ChevronDown,
   Plus,
   Shield,
-  LayoutDashboard,
-  Key,
   X,
+  ChartBar,
+  Contact,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { usePermission } from '../../hooks/usePermission';
@@ -72,25 +75,22 @@ function NavBody() {
 
   return (
     <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-      {admin && <Item to="/dashboard" label="Dashboard" icon={LayoutDashboard} />}
       <Group label="Bookings" icon={ClipboardList}>
         {can('bookings.create') && <Item to="/bookings/new" label="New Booking" icon={Plus} />}
         {can('calendar.view') && <Item to="/calendar" label="Booking" icon={CalendarDays} />}
         {can('bookings.view') && <Item to="/bookings" label="My Bookings" icon={ClipboardList} />}
+        <Item to="/contacts" label="Contact" icon={Contact} />
       </Group>
-      {admin && <Item to="/halls" label="Conference Halls" icon={DoorOpen} />}
+      {can('halls.view') && <Item to="/halls" label="Conference Halls" icon={DoorOpen} />}
       {admin && <Item to="/events" label="Events" icon={CalendarDays} />}
       {can('display.view') && <Item to="/displays" label="Displays" icon={Monitor} />}
-      {admin && <Item to="/reports" label="Reports" icon={BarChart3} />}
       {admin && (
         <Group label="Administration" icon={Settings}>
-          <Item to="/admin/users" label="Users" icon={Users} />
+          <Item to="/admin/users" label="Users & roles" icon={Users} />
           <Item to="/admin/roles" label="Roles" icon={Shield} />
           <Item to="/admin/departments" label="Departments" icon={Users} />
-          <Item to="/admin/maintenance" label="Maintenance" icon={Settings} />
-          <Item to="/admin/settings" label="Settings" icon={Settings} />
-          <Item to="/admin/encode-decode" label="Encode / Decode" icon={Key} />
-          <Item to="/admin/audit" label="Audit Logs" icon={ClipboardList} />
+          <Item to="/reports" label="Reports" icon={ChartBar} />
+          <Item to="/admin/audit" label="Audit" icon={ClipboardList} />
         </Group>
       )}
     </nav>

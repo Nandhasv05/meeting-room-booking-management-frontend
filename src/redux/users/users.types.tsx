@@ -22,5 +22,11 @@ const usersActionTypes = {
 	CREATE_USER_RESPONSE_RESET_START: 'create_user_response_reset_start',
 	CREATE_USER_RESPONSE_CHANGED: 'create_user_response_changed',
 
+	UPDATE_USER_START: 'update_user_start',
+	UPDATE_USER_SUCCESS: 'update_user_success',
+	UPDATE_USER_FAILURE: 'update_user_failure',
+	UPDATE_USER_RESPONSE_RESET_START: 'update_user_response_reset_start',
+	UPDATE_USER_RESPONSE_CHANGED: 'update_user_response_changed',
+
 };
 export default usersActionTypes;

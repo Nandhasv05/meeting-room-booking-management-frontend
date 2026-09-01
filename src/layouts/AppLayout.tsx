@@ -4,11 +4,15 @@ import { Topbar } from '../components/layout/Topbar';
 import { Footer } from '../components/layout/Footer';
 import { ShellProvider } from '../components/layout/ShellContext';
 import { useAppSelector } from '../store';
+import { readSsoTicket } from '../components/portal/PortalSsoListener';
 
 export function AppLayout() {
   const token = useAppSelector((s) => s.auth.accessToken);
   const location = useLocation();
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) {
+    if (readSsoTicket(location.search)) return null;
+    return <Navigate to="/login" replace />;
+  }
   return (
     <ShellProvider>
       <div className="app-shell flex h-[100dvh] overflow-hidden">

@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { BrandLogo } from '../../components/brand/BrandLogo';
 import { LogoSpinner } from '../../components/brand/LogoSpinner';
 import { loginSchema, LoginFormData } from '../../helpers/login/loginValidation';
+import { PORTAL_LOGIN_URL } from '../../redux/const';
 
 function clockLabel(now: Date) {
   return now.toLocaleString(undefined, {
@@ -164,6 +165,12 @@ export function LoginPage() {
               {loginLoading ? 'Signing in…' : 'Enter halls'}
             </button>
           </form>
+          <p className="mt-5 text-center text-xs text-white/40">
+            Company portal:{' '}
+            <a href={PORTAL_LOGIN_URL} className="font-semibold text-emerald-300/80 underline-offset-2 hover:underline">
+              EVOLV sign in
+            </a>
+          </p>
         </div>
 
         <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/28">

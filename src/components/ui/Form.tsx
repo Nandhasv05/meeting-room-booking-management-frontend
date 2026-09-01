@@ -35,6 +35,46 @@ export function Modal({
   );
 }
 
+export function Offcanvas({
+  open,
+  title,
+  subtitle,
+  children,
+  onClose,
+  footer,
+}: {
+  open: boolean;
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+  onClose: () => void;
+  footer?: ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <button className="absolute inset-0 cursor-default bg-navy-950/45 backdrop-blur-sm" aria-label="Close" onClick={onClose} />
+      <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-navy-800/10 bg-white shadow-lift animate-offcanvas">
+        <div className="flex items-start justify-between gap-3 border-b border-navy-800/8 px-5 py-4">
+          <div className="min-w-0">
+            <h2 className="font-display text-lg font-semibold text-navy-900">{title}</h2>
+            {subtitle ? <p className="mt-0.5 text-sm text-navy-800/55">{subtitle}</p> : null}
+          </div>
+          <button
+            type="button"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-lg leading-none text-navy-800/45 transition hover:bg-mist hover:text-navy-900"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        </div>
+        <div className="soft-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+        {footer ? <div className="border-t border-navy-800/8 bg-mist/30 px-5 py-3">{footer}</div> : null}
+      </aside>
+    </div>
+  );
+}
+
 export function Field({
   label,
   hint,

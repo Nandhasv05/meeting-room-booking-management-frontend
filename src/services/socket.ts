@@ -1,12 +1,13 @@
 import { io, type Socket } from 'socket.io-client';
 import { store } from '../store';
+import { SOCKET_PATH, SOCKET_URL } from '../redux/const';
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (socket) return socket;
-  socket = io(import.meta.env.VITE_SOCKET_URL || '/', {
-    path: '/socket.io',
+  socket = io(SOCKET_URL, {
+    path: SOCKET_PATH,
     auth: { token: store.getState().auth.accessToken },
     transports: ['websocket', 'polling'],
   });

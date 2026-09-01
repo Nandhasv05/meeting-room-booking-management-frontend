@@ -27,6 +27,11 @@ export const hallSchema = z
     closingTime: z.string().min(1, 'Closing time is required'),
     facilityIds: z.array(z.string()),
     layouts: z.array(z.object({ name: z.string(), capacity: z.number(), isDefault: z.boolean() })),
+    status: z.string().min(1),
+    maintTitle: z.string().optional(),
+    maintStartAt: z.string().optional(),
+    maintEndAt: z.string().optional(),
+    maintDescription: z.string().optional(),
   })
   .refine((v) => !v.openingTime || !v.closingTime || v.closingTime > v.openingTime, {
     message: 'Closing must be after opening',

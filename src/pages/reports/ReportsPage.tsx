@@ -3,7 +3,7 @@
 // DESCRIPTION : Reports page to view reports
 import { useEffect, useState } from 'react';
 import { Download, FileText } from 'lucide-react';
-import { EmptyState, Spinner } from '../../components/ui/Feedback';
+import { EmptyState, Spinner, StatusBadge } from '../../components/ui/Feedback';
 import { GhostButton, inputClass, PrimaryButton } from '../../components/ui/Form';
 import { DataTable, TabPills, Toolbar, type Column } from '../../components/ui/Surface';
 import { usePermission } from '../../hooks/usePermission';
@@ -11,10 +11,11 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchReportStart } from '../../redux/reports/reports.action';
 import { selectReportLoading, selectRows } from '../../redux/reports/reports.selector';
 import { exportReportCall } from '../../redux/reports/reports.services';
-import { tabs, ReportType, humanizeKey } from '../../helpers/reports/reportsValidation';
+import { tabs, ReportType, humanizeKey, formatReportCell, isReportDateField } from '../../helpers/reports/reportsValidation';
+import { fmtDateTime } from '../../utils/format';
 
 export function ReportsPage() {
-
+  
   /******* STATE *******/
   const { can } = usePermission();
   const dispatch = useAppDispatch();
@@ -35,11 +36,23 @@ export function ReportsPage() {
 
 
   const rows = data ?? [];
-  const columns: Column<Record<string, unknown>>[] = (rows[0] ? Object.keys(rows[0]) : []).map((key) => ({
-    key,
-    header: humanizeKey(key),
-    render: (row) => String(row[key] ?? '—'),
-  }));
+  const columns: Column<Record<string, unknown>>[] = (rows[0] ? Object.keys(rows[0]) : [])
+    .filter((key) => key !== 'CancellationReason' || rows.some((row) => String(row[key] ?? '').trim() !== ''))
+    .map((key) => ({
+      key,
+      header: humanizeKey(key),
+      align: key === 'AttendeeCount' || key === 'Count' || key === 'Capacity' ? 'right' : 'left',
+      render: (row) => {
+        const value = row[key];
+        if (key === 'Status' && typeof value === 'string' && value) {
+          return <StatusBadge value={value} />;
+        }
+        if (isReportDateField(key, value) && value != null && value !== '') {
+          return fmtDateTime(value as string | Date);
+        }
+        return formatReportCell(key, value);
+      },
+    }));
 
   /******* HANDLERS *******/
   const download = async (format: 'xlsx' | 'pdf') => {

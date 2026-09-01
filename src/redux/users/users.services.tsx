@@ -16,3 +16,14 @@ export const searchUsersCall = (payload?: any) => {
 export const createUserCall = (payload?: any) => {
 	return makeApiCall('/users/create', payload);
 };
+
+export const updateUserCall = (payload?: any) => {
+	const id = encodeURIComponent(String(payload?.id ?? ''));
+	const { id: _id, ...body } = payload ?? {};
+	return makeApiCall(`/users/${id}/update`, body);
+};
+
+export const getUserCall = (payload?: any) => {
+	const id = encodeURIComponent(String(payload?.id ?? ''));
+	return makeApiCall(`/users/${id}`, {});
+};

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
+import { publicAsset } from '../../utils/baseUrl';
 
-const LOGO_SRC = '/assets/logo.png';
+const LOGO_SRC = publicAsset('assets/logo.png');
 
 type BrandLogoProps = {
   variant?: 'dark' | 'light';

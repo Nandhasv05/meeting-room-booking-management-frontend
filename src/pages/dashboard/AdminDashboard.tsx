@@ -15,11 +15,16 @@ import { Building2, CalendarClock, ClipboardList, KeyRound, Settings, Shield, Us
 import { StatusBadge } from '../../components/ui/Feedback';
 import { PulseStat, type Dash } from './shared';
 
+//
 export function AdminDashboard({ data }: { data: Dash }) {
   /******* STATE *******/
-  const s = data.stats;
-  const maxDept = Math.max(...data.byDepartment.map((d) => Number(d.Count) || 0), 1);
-  const maxRole = Math.max(...data.usersByRole.map((r) => Number(r.Count) || 0), 1);
+  const s = data.stats ?? {};
+  const byDepartment = data.byDepartment ?? [];
+  const usersByRole = data.usersByRole ?? [];
+  const trend = data.trend ?? [];
+  const recent = data.recent ?? [];
+  const maxDept = Math.max(...byDepartment.map((d) => Number(d.Count) || 0), 1);
+  const maxRole = Math.max(...usersByRole.map((r) => Number(r.Count) || 0), 1);
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -28,20 +33,20 @@ export function AdminDashboard({ data }: { data: Dash }) {
         subtitle={`${s.ActiveUsers ?? 0} active users · ${s.TotalHalls ?? 0} halls · ${s.TodayBookings ?? 0} bookings today`}
       /> */}
 
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 stagger">
-        <PulseStat icon={Users} label="Users" value={s.TotalUsers} />
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4 stagger">
+        {/* <PulseStat icon={Users} label="Users" value={s.TotalUsers} /> */}
         <PulseStat icon={Users} label="Active" value={s.ActiveUsers} accent />
         <PulseStat icon={Building2} label="Halls" value={s.TotalHalls} />
         <PulseStat icon={CalendarClock} label="Today" value={s.TodayBookings} />
         <PulseStat icon={ClipboardList} label="Departments" value={s.Departments} />
-        <PulseStat icon={Wrench} label="Cancelled 30d" value={s.CancelledLast30} warn={(s.CancelledLast30 ?? 0) > 8} />
+        {/* <PulseStat icon={Wrench} label="Cancelled 30d" value={s.CancelledLast30} warn={(s.CancelledLast30 ?? 0) > 8} /> */}
       </section>
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel animate-rise">
           <h3 className="mb-4 font-display text-base font-semibold text-navy-900">People by role</h3>
           <ul className="space-y-3">
-            {(data.usersByRole ?? []).map((row) => {
+            {usersByRole.map((row) => {
               const pct = Math.round((Number(row.Count) / maxRole) * 100);
               return (
                 <li key={row.RoleCode}>
@@ -61,10 +66,10 @@ export function AdminDashboard({ data }: { data: Dash }) {
         <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel animate-rise">
           <h3 className="mb-4 font-display text-base font-semibold text-navy-900">Bookings by department</h3>
           <ul className="space-y-3">
-            {data.byDepartment.length === 0 ? (
+            {byDepartment.length === 0 ? (
               <li className="text-sm text-navy-800/50">No bookings in the last 30 days.</li>
             ) : (
-              data.byDepartment.slice(0, 6).map((row) => {
+              byDepartment.slice(0, 6).map((row) => {
                 const pct = Math.round((Number(row.Count) / maxDept) * 100);
                 return (
                   <li key={row.Department}>
@@ -88,7 +93,7 @@ export function AdminDashboard({ data }: { data: Dash }) {
           <h3 className="mb-1 font-display text-base font-semibold text-navy-900">Booking trend</h3>
           <p className="mb-3 text-xs text-navy-800/50">Last 30 days</p>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={data.trend}>
+            <AreaChart data={trend}>
               <defs>
                 <linearGradient id="adminTrend" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#2F7A4E" stopOpacity={0.35} />
@@ -109,10 +114,10 @@ export function AdminDashboard({ data }: { data: Dash }) {
             <h3 className="font-display text-base font-semibold text-navy-900">Recent bookings</h3>
           </div>
           <ul className="divide-y divide-navy-800/10">
-            {data.recent.length === 0 ? (
+            {recent.length === 0 ? (
               <li className="px-4 py-8 text-center text-sm text-navy-800/50">No recent bookings.</li>
             ) : (
-              data.recent.slice(0, 7).map((row) => (
+              recent.slice(0, 7).map((row) => (
                 <li key={row.Id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <div className="min-w-0">
                     <Link to={`/bookings/${row.Id}`} className="truncate text-sm font-medium text-navy-900 hover:text-brand-400">
@@ -128,10 +133,10 @@ export function AdminDashboard({ data }: { data: Dash }) {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel">
+      {/* <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel">
         <h3 className="mb-3 font-display text-sm font-semibold text-navy-900">Administration</h3>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <AdminLink to="/admin/users" icon={Users} label="Users" hint="Accounts and roles" />
+          <AdminLink to="/admin/users" icon={Users} label="Users & roles" hint="Add accounts and assign roles" />
           <AdminLink to="/admin/roles" icon={Shield} label="Roles" hint="Permissions" />
           <AdminLink to="/admin/departments" icon={Building2} label="Departments" hint="Org units" />
           <AdminLink to="/admin/settings" icon={Settings} label="Settings" hint="System options" />
@@ -141,7 +146,7 @@ export function AdminDashboard({ data }: { data: Dash }) {
           <AdminLink to="/reports" icon={CalendarClock} label="Reports" hint="Utilization & trends" />
           <AdminLink to="/halls" icon={Building2} label="Halls" hint="Rooms catalog" />
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

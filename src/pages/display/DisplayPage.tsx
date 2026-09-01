@@ -23,14 +23,14 @@ import {
 } from '../../helpers/display/displayValidation';
 
 const CHIP: Record<DisplayPayload['state'], string> = {
-  AVAILABLE: 'Free now',
+  AVAILABLE: 'Available',
   UPCOMING: 'Starting soon',
   ONGOING: 'In progress',
   MAINTENANCE: 'Unavailable',
 };
 
 const COUNT_HINT: Record<DisplayPayload['state'], string> = {
-  AVAILABLE: 'Open now',
+  AVAILABLE: 'Available',
   UPCOMING: 'Starts in',
   ONGOING: 'Ends in',
   MAINTENANCE: 'Offline',
@@ -149,17 +149,19 @@ export function DisplayPage() {
               {CHIP[data.state]}
             </span>
             <KineticWord word={haloWord[data.state]} />
-            <p className="stage-hero__hint">{COUNT_HINT[data.state]}</p>
             {count ? (
-              <div className="stage-count">
-                <CountBlock value={count.h || '0'} label="Hrs" />
-                <span className="stage-count__sep">:</span>
-                <CountBlock value={count.m || '0'} label="Min" />
-                <span className="stage-count__sep">:</span>
-                <CountBlock value={count.s || '0'} label="Sec" />
-              </div>
+              <>
+                <p className="stage-hero__hint">{COUNT_HINT[data.state]}</p>
+                <div className="stage-count">
+                  <CountBlock value={count.h || '0'} label="Hrs" />
+                  <span className="stage-count__sep">:</span>
+                  <CountBlock value={count.m || '0'} label="Min" />
+                  <span className="stage-count__sep">:</span>
+                  <CountBlock value={count.s || '0'} label="Sec" />
+                </div>
+              </>
             ) : (
-              <p className="stage-hero__idle">{data.subtitle}</p>
+              <p className="stage-hero__idle">{data.state === 'AVAILABLE' ? 'Available' : data.subtitle}</p>
             )}
           </div>
 
