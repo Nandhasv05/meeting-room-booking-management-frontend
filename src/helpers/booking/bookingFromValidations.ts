@@ -16,6 +16,11 @@ export type Values = {
   purpose: string;
 };
 
+function localSlot(date: string, time: string): Date {
+  const clock = /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time;
+  return new Date(`${date}T${clock}`);
+}
+
 export const schema: z.ZodType<Values> = z
   .object({
     name: z.string().min(1, 'Title is required'),
@@ -34,14 +39,14 @@ export const schema: z.ZodType<Values> = z
   .refine(
     (v) => {
       if (!v.date || !v.startTime || !v.endTime) return true;
-      return new Date(`${v.date}T${v.endTime}:00`) > new Date(`${v.date}T${v.startTime}:00`);
+      return localSlot(v.date, v.endTime) > localSlot(v.date, v.startTime);
     },
     { message: 'End time must be after start time', path: ['endTime'] },
   )
   .refine(
     (v) => {
       if (!v.date || !v.startTime) return true;
-      return new Date(`${v.date}T${v.startTime}:00`).getTime() >= Date.now() - 60_000;
+      return localSlot(v.date, v.startTime).getTime() >= Date.now() - 60_000;
     },
     { message: 'Choose a start time in the future (not earlier today).', path: ['startTime'] },
   );
@@ -104,7 +109,7 @@ export function isMailId(value: string): boolean {
 
 export function slotIso(date: string, time: string): string | undefined {
   if (!date || !time) return undefined;
-  const d = new Date(`${date}T${time}:00`);
+  const d = localSlot(date, time);
   return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 }
 

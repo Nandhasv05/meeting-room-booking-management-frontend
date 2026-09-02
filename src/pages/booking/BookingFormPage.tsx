@@ -26,6 +26,7 @@ import {
   isMailId,
   parseEmails,
   schema,
+  slotIso,
   type Values,
 } from '../../helpers/booking/bookingFromValidations';
 
@@ -114,17 +115,19 @@ export function BookingFormPage() {
               .map((e: PickedEmployee) => cleanMailText(e.email).toLowerCase())
               .filter(Boolean);
             const invites = [...new Set([...fromPeople, ...parseEmails(v.extraEmails ?? '')])];
-            if (invites.length === 0) {
-              toast.error('Add at least one employee or invitation mail ID.');
-              return;
-            }
             const bad = invites.find((email) => !isMailId(email));
             if (bad) {
               toast.error(`Invalid invitation mail ID: ${bad}`);
               return;
             }
-            const startAt = new Date(`${v.date}T${v.startTime}:00`);
-            const endAt = new Date(`${v.date}T${v.endTime}:00`);
+            const startIso = slotIso(v.date, v.startTime);
+            const endIso = slotIso(v.date, v.endTime);
+            if (!startIso || !endIso) {
+              toast.error('Choose a valid date and time.');
+              return;
+            }
+            const startAt = new Date(startIso);
+            const endAt = new Date(endIso);
             if (startAt.getTime() < Date.now() - 60_000) {
               toast.error('Cannot book a time in the past. Choose a later start time or tomorrow.');
               return;
@@ -142,8 +145,8 @@ export function BookingFormPage() {
                 mailId: v.mailId.trim(),
                 invitationEmails: invites,
                 hallId: v.hallId,
-                startAt: startAt.toISOString(),
-                endAt: endAt.toISOString(),
+                startAt: startIso,
+                endAt: endIso,
                 attendeeCount: Number(v.hallAttendance),
                 purpose: v.purpose,
                 attendees: invites.map((email) => ({
