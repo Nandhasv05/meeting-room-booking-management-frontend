@@ -7,7 +7,7 @@ import { useShell } from './ShellContext';
 import { fetchNotificationsStart } from '../../redux/notifications/notifications.action';
 import { selectNotifications } from '../../redux/notifications/notifications.selector';
 import { selectCurrentUser } from '../../redux/login/login.selector';
-import { PORTAL_HOME_URL } from '../../redux/const';
+import { PORTAL_HOME_URL, PORTAL_LOGOUT_URL } from '../../redux/const';
 
 const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/contacts/, title: 'Contact' },
@@ -118,7 +118,7 @@ export function Topbar() {
   const signOut = () => {
     setMenuOpen(false);
     dispatch(userSignInLogOutStart());
-    window.location.assign(PORTAL_HOME_URL);
+    window.location.assign(PORTAL_LOGOUT_URL);
   };
 
   return (

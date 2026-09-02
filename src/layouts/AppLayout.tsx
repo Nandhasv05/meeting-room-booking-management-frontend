@@ -1,17 +1,16 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Topbar } from '../components/layout/Topbar';
 import { Footer } from '../components/layout/Footer';
 import { ShellProvider } from '../components/layout/ShellContext';
 import { useAppSelector } from '../store';
-import { goToPortalLogin, isLocalHost, readSsoTicket } from '../components/portal/PortalSsoListener';
+import { goToPortalLogin, readSsoTicket } from '../components/portal/PortalSsoListener';
 
 export function AppLayout() {
   const token = useAppSelector((s) => s.auth.accessToken);
   const location = useLocation();
   if (!token) {
     if (readSsoTicket(location.search)) return null;
-    if (isLocalHost()) return <Navigate to="/login" replace />;
     goToPortalLogin();
     return null;
   }

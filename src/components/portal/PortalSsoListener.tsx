@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { userSsoStart, userSignInResponseResetStart } from '../../redux/login/login.action';
 import { selectLoginLoading, selectLoginResponse, selectIsAuthenticated } from '../../redux/login/login.selector';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { PORTAL_LOGIN_URL } from '../../redux/const';
+import { PORTAL_LAUNCH_URL } from '../../redux/const';
 import { LogoSpinner } from '../brand/LogoSpinner';
 
 export function readSsoTicket(search: string): string {
@@ -20,7 +20,7 @@ export function isLocalHost(): boolean {
 }
 
 export function goToPortalLogin() {
-  window.location.replace(PORTAL_LOGIN_URL);
+  window.location.replace(PORTAL_LAUNCH_URL);
 }
 
 function stripSsoFromUrl() {
@@ -59,8 +59,7 @@ export function PortalSsoListener() {
     toast.error(loginResponse.message || 'Portal sign-in failed.');
     stripSsoFromUrl();
     started.current = '';
-    if (isLocalHost()) navigate('/login', { replace: true });
-    else goToPortalLogin();
+    goToPortalLogin();
   }, [loginResponse, dispatch, navigate]);
 
   if (ticket && !authenticated) {

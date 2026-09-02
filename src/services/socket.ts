@@ -9,8 +9,12 @@ export function getSocket(): Socket {
   socket = io(SOCKET_URL, {
     path: SOCKET_PATH,
     auth: { token: store.getState().auth.accessToken },
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
+    upgrade: true,
+    reconnection: true,
+    reconnectionAttempts: 8,
   });
+  socket.on('connect_error', () => undefined);
   return socket;
 }
 

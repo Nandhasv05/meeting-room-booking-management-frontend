@@ -192,7 +192,7 @@ export function EncodeDecodeStandalonePage() {
     <div className="min-h-[100dvh] bg-[#f6f8f7] px-4 py-8">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6">
-          <BrandLogo height={32} to="/login" />
+          <BrandLogo height={32} to={null} />
         </div>
         <EncodeDecodePage />
       </div>
