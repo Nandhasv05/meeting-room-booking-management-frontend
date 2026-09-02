@@ -74,12 +74,18 @@ export function EmployeePicker({
     if (q.trim().length >= 2) dispatch(searchUsersStart({ q }));
   }, [q, dispatch]);
 
+  const sameMail = (left?: string | null, right?: string | null) => {
+    const a = (left ?? '').trim().toLowerCase();
+    const b = (right ?? '').trim().toLowerCase();
+    return Boolean(a && b && a === b);
+  };
+
   const directory = (data ?? [])
-    .filter((e) => !selected.some((s) => s.id === e.Id || s.email.toLowerCase() === e.Email.toLowerCase()))
+    .filter((e) => !selected.some((s) => s.id === e.Id || sameMail(s.email, e.Email)))
     .map((e) => ({
       id: e.Id,
       name: `${e.FirstName} ${e.LastName}`.trim(),
-      email: e.Email,
+      email: e.Email ?? '',
       hint: `${e.EmployeeId} · ${e.DepartmentName ?? 'No department'}`,
     }));
 
@@ -88,10 +94,13 @@ export function EmployeePicker({
       const hay = `${c.name} ${c.email}`.toLowerCase();
       return q.trim().length >= 2 && hay.includes(q.trim().toLowerCase());
     })
-    .filter((c) => !selected.some((s) => s.email.toLowerCase() === c.email.toLowerCase()))
-    .map((c) => ({ id: `guest:${c.email}`, name: c.name, email: c.email, hint: 'Saved contact' }));
+    .filter((c) => !selected.some((s) => sameMail(s.email, c.email)))
+    .map((c) => ({ id: `guest:${c.email}`, name: c.name, email: c.email ?? '', hint: 'Saved contact' }));
 
-  const results = [...directory, ...book.filter((c) => !directory.some((d) => d.email.toLowerCase() === c.email.toLowerCase()))];
+  const results = [
+    ...directory,
+    ...book.filter((c) => !directory.some((d) => sameMail(d.email, c.email))),
+  ];
 
   return (
     <div>

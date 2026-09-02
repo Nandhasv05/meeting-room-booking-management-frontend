@@ -76,7 +76,7 @@ export function Composer({
     attendeeCount: parsed.count || undefined,
   });
 
-  const hall = data?.hall ?? null;
+  const hall = data?.hall && String(data.hall.hallId) === String(values.hallId) ? data.hall : null;
   const people = data?.people ?? [];
   const busyPeople = people.filter((p) => !p.available);
   const selectedHall = halls.find((h) => h.Id === values.hallId);
@@ -85,9 +85,18 @@ export function Composer({
     ? 'idle'
     : isFetching
       ? 'checking'
-      : (values.hallId && hall && !hall.available) || busyPeople.length
+      : (hall && !hall.available) || busyPeople.length
         ? 'busy'
         : 'free';
+  const hallState: SlotState = !values.hallId
+    ? 'idle'
+    : !validSlot || isFetching
+      ? 'checking'
+      : hall
+        ? hall.available
+          ? 'free'
+          : 'busy'
+        : 'idle';
 
   return (
     <div className="overflow-hidden rounded-2xl border border-navy-800/10 bg-white shadow-panel">
@@ -107,7 +116,7 @@ export function Composer({
             Discard
           </GhostButton>
           <PrimaryButton type="submit" disabled={pending}>
-            {pending ? 'Saving…' : 'Save & send invites'}
+            {pending ? 'Saving…' : 'Save booking'}
           </PrimaryButton>
         </div>
       </div>
@@ -126,7 +135,7 @@ export function Composer({
           <Row icon={Users}>
             <EmployeePicker
               variant="inline"
-              placeholder="Invite required attendees"
+              placeholder="Invite attendees (optional)"
               selected={values.employees}
               busyIds={busyPeople.map((p) => p.userId)}
               renderEmpty={false}
@@ -184,7 +193,7 @@ export function Composer({
               </select>
               <span className="text-xs text-navy-800/45">Expected</span>
               <input type="number" min={1} className={`${bare} w-20`} {...register('hallAttendance')} />
-              {values.hallId ? <StatusPill state={isFetching ? 'checking' : hall?.available ? 'free' : 'busy'} /> : null}
+              {values.hallId ? <StatusPill state={hallState} /> : null}
             </div>
             {selectedHall ? (
               <p className="mt-1 text-xs text-navy-800/45">
@@ -319,7 +328,7 @@ export function InvitePreview({
   if (!guests.length) {
     return (
       <p className="mt-2 text-xs text-navy-800/50">
-        Add people or extra mail IDs. You are the sender; they only receive the invite.
+        Attendees and extra mail IDs are optional. Add them only if you want invitations sent.
       </p>
     );
   }
