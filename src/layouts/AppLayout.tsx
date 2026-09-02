@@ -4,14 +4,16 @@ import { Topbar } from '../components/layout/Topbar';
 import { Footer } from '../components/layout/Footer';
 import { ShellProvider } from '../components/layout/ShellContext';
 import { useAppSelector } from '../store';
-import { readSsoTicket } from '../components/portal/PortalSsoListener';
+import { goToPortalLogin, isLocalHost, readSsoTicket } from '../components/portal/PortalSsoListener';
 
 export function AppLayout() {
   const token = useAppSelector((s) => s.auth.accessToken);
   const location = useLocation();
   if (!token) {
     if (readSsoTicket(location.search)) return null;
-    return <Navigate to="/login" replace />;
+    if (isLocalHost()) return <Navigate to="/login" replace />;
+    goToPortalLogin();
+    return null;
   }
   return (
     <ShellProvider>

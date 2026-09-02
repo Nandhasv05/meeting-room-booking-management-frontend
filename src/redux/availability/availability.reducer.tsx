@@ -17,6 +17,7 @@ const availabilityReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 				availabilityLoading: true,
+				availability: null,
 			};
 		case availabilityActionTypes.CHECK_AVAILABILITY_SUCCESS:
 			return {

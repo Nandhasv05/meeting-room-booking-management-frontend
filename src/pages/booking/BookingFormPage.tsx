@@ -94,6 +94,8 @@ export function BookingFormPage() {
         'Booking confirmed',
         `Invitations were emailed to ${mail.sent} guest${mail.sent === 1 ? '' : 's'}. Replies go to your mail ID.`,
       );
+    } else if (id && (!mail || mail.failed === 0)) {
+      celebrate('Booking confirmed', 'Hall is booked.');
     } else if (mail && !mail.configured) {
       celebrate('Booking confirmed', 'Hall is booked. Invitations were not emailed yet.');
       toast.error(mail.error || 'Save the sending mailbox app password in Settings, then book again.');

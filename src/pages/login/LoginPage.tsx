@@ -15,6 +15,7 @@ import { BrandLogo } from '../../components/brand/BrandLogo';
 import { LogoSpinner } from '../../components/brand/LogoSpinner';
 import { loginSchema, LoginFormData } from '../../helpers/login/loginValidation';
 import { PORTAL_LOGIN_URL } from '../../redux/const';
+import { goToPortalLogin, isLocalHost } from '../../components/portal/PortalSsoListener';
 
 function clockLabel(now: Date) {
   return now.toLocaleString(undefined, {
@@ -34,6 +35,7 @@ export function LoginPage() {
   const loginLoading = useAppSelector(selectLoginLoading);
   const [showPassword, setShowPassword] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const local = isLocalHost();
 
   const {
     register,
@@ -56,17 +58,26 @@ export function LoginPage() {
     navigate('/');
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    dispatch(userSignInStart({ email: data.email, password: data.password }));
-  };
+  useEffect(() => {
+    if (!local) goToPortalLogin();
+  }, [local]);
 
   useEffect(() => {
+    if (!local) return;
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => {
       window.clearInterval(id);
       dispatch(userSignInResponseResetStart());
     };
-  }, [dispatch]);
+  }, [dispatch, local]);
+
+  if (!local) {
+    return <LogoSpinner fullScreen light label="Opening EVOLV sign in…" size="lg" />;
+  }
+
+  const onSubmit = (data: LoginFormData) => {
+    dispatch(userSignInStart({ email: data.email, password: data.password }));
+  };
 
   const fieldClass =
     'w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3.5 text-[15px] text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400/70 focus:bg-white/[0.09] focus:ring-4 focus:ring-emerald-400/15';
