@@ -13,6 +13,7 @@ RewriteRule ^uploads(?:/(.*))?$ - [L]
 RewriteRule ^socket\.io(/|$) - [L]
 RewriteRule ^assets(?:/(.*))?$ - [L]
 RewriteRule ^api-proxy\.php$ - [L]
+RewriteRule ^login/?$ /EVOL/meeting_launch.php [R=302,L]
 
 RewriteRule ^index\.html$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f

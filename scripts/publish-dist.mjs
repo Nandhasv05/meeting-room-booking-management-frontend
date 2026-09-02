@@ -35,6 +35,11 @@ for (const extra of ['.htaccess', 'web.config', 'api-proxy.php']) {
   const from = join(dist, extra);
   if (existsSync(from)) cpSync(from, join(target, extra));
 }
+const loginFrom = join(dist, 'login');
+if (existsSync(loginFrom)) {
+  mkdirSync(join(target, 'login'), { recursive: true });
+  cpSync(loginFrom, join(target, 'login'), { recursive: true });
+}
 
 console.log(`Published Meeting Hall UI to ${target}`);
 console.log('Confirm index.html contains /Meeting/assets/ then hard-refresh the browser.');

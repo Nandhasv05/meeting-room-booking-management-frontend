@@ -23,12 +23,20 @@ export function goToPortalLogin() {
   window.location.replace(PORTAL_LAUNCH_URL);
 }
 
-function stripSsoFromUrl() {
-  const url = new URL(window.location.href);
-  url.searchParams.delete('sso');
-  url.searchParams.delete('token');
-  const next = `${url.pathname}${url.search}${url.hash}`;
-  window.history.replaceState({}, '', next);
+export function clearClientCache() {
+  try {
+    localStorage.clear();
+  } catch {
+    /* ignore blocked storage */
+  }
+  try {
+    sessionStorage.clear();
+  } catch {
+    /* ignore blocked storage */
+  }
+  if (typeof caches !== 'undefined' && typeof caches.keys === 'function') {
+    void caches.keys().then((keys) => Promise.all(keys.map((name) => caches.delete(name)))).catch(() => undefined);
+  }
 }
 
 export function PortalSsoListener() {
@@ -42,27 +50,24 @@ export function PortalSsoListener() {
   const started = useRef('');
 
   useEffect(() => {
-    if (!ticket || authenticated || started.current === ticket) return;
+    if (!ticket || started.current === ticket) return;
     started.current = ticket;
     dispatch(userSsoStart(ticket));
-  }, [ticket, authenticated, dispatch]);
+  }, [ticket, dispatch]);
 
   useEffect(() => {
     if (!loginResponse || !started.current) return;
     dispatch(userSignInResponseResetStart());
     if (loginResponse.success) {
       toast.success('Welcome back.');
-      stripSsoFromUrl();
-      navigate('/', { replace: true });
+      navigate({ pathname: '/', search: '' }, { replace: true });
       return;
     }
     toast.error(loginResponse.message || 'Portal sign-in failed.');
-    stripSsoFromUrl();
-    started.current = '';
     goToPortalLogin();
   }, [loginResponse, dispatch, navigate]);
 
-  if (ticket && !authenticated) {
+  if (ticket && (!authenticated || loginLoading || started.current === ticket)) {
     return <LogoSpinner fullScreen light={false} label={loginLoading ? 'Opening Meeting Hall…' : 'Signing in…'} size="lg" />;
   }
   return null;
