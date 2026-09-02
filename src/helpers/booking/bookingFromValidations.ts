@@ -21,15 +21,39 @@ function localSlot(date: string, time: string): Date {
   return new Date(`${date}T${clock}`);
 }
 
+export const MAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z0-9]{2,}/gi;
+export const MAIL_EXACT = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z0-9]{2,}$/i;
+
+export function cleanMailText(value: string | null | undefined): string {
+  return String(value ?? '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
+    .replace(/\uFF20/g, '@')
+    .trim();
+}
+
+export function isMailId(value: string | null | undefined): boolean {
+  return MAIL_EXACT.test(cleanMailText(value).toLowerCase());
+}
+
 export const schema: z.ZodType<Values> = z
   .object({
     name: z.string().min(1, 'Title is required'),
     eventType: z.string().min(1),
     departmentId: z.string().min(1, 'Department is required'),
-    mailId: z.string().email('Enter a valid mail ID').min(1, 'Organizer mail ID is required'),
+    mailId: z
+      .string()
+      .min(1, 'Organizer mail ID is required')
+      .refine((value) => isMailId(value), 'Enter a valid mail ID'),
     hallId: z.string().min(1, 'Conference hall is required'),
     hallAttendance: z.coerce.number().positive('Must be at least 1'),
-    employees: z.array(z.object({ id: z.string(), name: z.string(), email: z.string() })),
+    employees: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        email: z.string().optional().default(''),
+      }),
+    ),
     extraEmails: z.string(),
     date: z.string().min(1),
     startTime: z.string().min(1),
@@ -85,26 +109,11 @@ export function defaultDateTime() {
 
 export const defaults = defaultDateTime();
 
-export const MAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
-export const MAIL_EXACT = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
-
-export function cleanMailText(value: string): string {
-  return value
-    .normalize('NFKC')
-    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
-    .replace(/\uFF20/g, '@')
-    .trim();
-}
-
 /** Pull real addresses out of a paste (commas, names, <brackets>, hidden characters). */
 export function parseEmails(raw: string): string[] {
   const cleaned = cleanMailText(raw).toLowerCase();
   const found = cleaned.match(MAIL_RE) ?? [];
   return [...new Set(found)];
-}
-
-export function isMailId(value: string): boolean {
-  return MAIL_EXACT.test(cleanMailText(value).toLowerCase());
 }
 
 export function slotIso(date: string, time: string): string | undefined {

@@ -76,7 +76,10 @@ export function useAvailability(input: {
     dispatch(
       checkAvailabilityStart({
         hallId: input.hallId || undefined,
-        userIds: input.userIds.filter((id) => /^\d+$/.test(String(id))),
+        userIds: input.userIds.filter((id) => {
+          const value = String(id ?? '').trim();
+          return value.length > 0 && value.length <= 64 && !value.startsWith('guest:');
+        }),
         startAt: input.startAt,
         endAt: input.endAt,
         attendeeCount: input.attendeeCount,

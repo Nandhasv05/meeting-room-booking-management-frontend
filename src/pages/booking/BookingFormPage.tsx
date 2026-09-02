@@ -115,11 +115,14 @@ export function BookingFormPage() {
           onSubmit={methods.handleSubmit((v: Values) => {
             const fromPeople = v.employees
               .map((e: PickedEmployee) => cleanMailText(e.email).toLowerCase())
-              .filter(Boolean);
+              .filter((email) => isMailId(email));
             const invites = [...new Set([...fromPeople, ...parseEmails(v.extraEmails ?? '')])];
-            const bad = invites.find((email) => !isMailId(email));
-            if (bad) {
-              toast.error(`Invalid invitation mail ID: ${bad}`);
+            const leftover = cleanMailText(v.extraEmails)
+              .split(/[,\s;]+/)
+              .map((part) => part.trim().toLowerCase())
+              .filter((part) => part.includes('@') && !isMailId(part) && !invites.includes(part));
+            if (leftover[0]) {
+              toast.error(`Invalid invitation mail ID: ${leftover[0]}`);
               return;
             }
             const startIso = slotIso(v.date, v.startTime);
@@ -138,7 +141,11 @@ export function BookingFormPage() {
               toast.error('End time must be after start time.');
               return;
             }
-            const named = new Map(v.employees.map((emp: PickedEmployee) => [emp.email.toLowerCase(), emp.name]));
+            const named = new Map(
+              v.employees
+                .filter((emp: PickedEmployee) => emp.email)
+                .map((emp: PickedEmployee) => [emp.email.toLowerCase(), emp.name]),
+            );
             dispatch(
               createBookingStart({
                 eventName: v.name,
