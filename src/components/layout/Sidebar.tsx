@@ -17,16 +17,19 @@ import {
   ChartBar,
   Contact,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { usePermission } from '../../hooks/usePermission';
 import { isAdminRole } from '../../utils/roles';
 import { BrandLogo } from '../brand/BrandLogo';
 import { useShell } from './ShellContext';
 
 function Item({ to, label, icon: Icon }: { to: string; label: string; icon: typeof CalendarDays }) {
+  const { setNavOpen } = useShell();
   return (
     <NavLink
       to={to}
+      onClick={() => setNavOpen(false)}
       className={({ isActive }) =>
         `relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-medium transition ${
           isActive
@@ -74,7 +77,7 @@ function NavBody() {
   const admin = isAdminRole(user?.roleCode);
 
   return (
-    <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
+    <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
       <Group label="Bookings" icon={ClipboardList}>
         {can('bookings.create') && <Item to="/bookings/new" label="New Booking" icon={Plus} />}
         {can('calendar.view') && <Item to="/calendar" label="Booking" icon={CalendarDays} />}
@@ -97,51 +100,122 @@ function NavBody() {
   );
 }
 
+function useDesktopNav() {
+  const [desktop, setDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const apply = () => setDesktop(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  return desktop;
+}
+
 export function Sidebar() {
   const { navOpen, setNavOpen } = useShell();
+  const desktop = useDesktopNav();
+
+  useEffect(() => {
+    if (desktop) setNavOpen(false);
+  }, [desktop, setNavOpen]);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNavOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [navOpen, setNavOpen]);
+
+  const panel = (
+    <>
+      <div className="relative overflow-hidden border-b border-white/10 px-4 py-4">
+        <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-brand-400/25 blur-2xl" />
+        <BrandLogo variant="light" height={26} to="/" />
+        <p className="relative mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+          Conference halls
+        </p>
+      </div>
+      <NavBody />
+      <div className="border-t border-white/10 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-white/25">
+        Internal LAN
+      </div>
+    </>
+  );
+
+  const mobileDrawer =
+    !desktop && navOpen && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 200,
+              width: '100vw',
+              height: '100dvh',
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setNavOpen(false)}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                border: 0,
+                background: 'rgba(15, 32, 21, 0.55)',
+                cursor: 'pointer',
+              }}
+            />
+            <aside
+              className="flex flex-col bg-navy-950 text-white shadow-lift animate-slideIn"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: 'min(18rem, 88vw)',
+                maxWidth: '88vw',
+                borderTopRightRadius: '1.5rem',
+                borderBottomRightRadius: '1.5rem',
+                overflow: 'hidden',
+              }}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                <BrandLogo variant="light" height={24} to="/" />
+                <button
+                  type="button"
+                  className="grid h-9 w-9 place-items-center rounded-xl text-white/70 transition hover:bg-white/10 hover:text-white"
+                  onClick={() => setNavOpen(false)}
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <NavBody />
+            </aside>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
     <>
-      {/* Desktop */}
-      <aside className="hidden h-full w-56 shrink-0 flex-col rounded-r-3xl bg-navy-950 text-white shadow-lift md:flex lg:w-60">
-        <div className="relative overflow-hidden border-b border-white/10 px-4 py-4">
-          <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-brand-400/25 blur-2xl" />
-          <BrandLogo variant="light" height={26} to="/" />
-          <p className="relative mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-            Conference halls
-          </p>
-        </div>
-        <NavBody />
-        <div className="border-t border-white/10 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-white/25">
-          Internal LAN
-        </div>
-      </aside>
-
-      {/* Mobile drawer */}
-      {navOpen ? (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-navy-950/50 backdrop-blur-[2px] animate-fade"
-            aria-label="Close menu"
-            onClick={() => setNavOpen(false)}
-          />
-          <aside className="absolute left-0 top-0 flex h-full w-[min(18rem,88vw)] flex-col rounded-r-3xl bg-navy-950 text-white shadow-lift animate-slideIn">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <BrandLogo variant="light" height={24} to="/" />
-              <button
-                type="button"
-                className="grid h-9 w-9 place-items-center rounded-xl text-white/70 transition hover:bg-white/10 hover:text-white"
-                onClick={() => setNavOpen(false)}
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <NavBody />
-          </aside>
-        </div>
+      {desktop ? (
+        <aside className="flex h-full w-56 shrink-0 flex-col rounded-r-3xl bg-navy-950 text-white shadow-lift lg:w-60">
+          {panel}
+        </aside>
       ) : null}
+      {mobileDrawer}
     </>
   );
 }

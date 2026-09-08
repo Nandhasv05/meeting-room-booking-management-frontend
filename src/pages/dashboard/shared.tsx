@@ -62,7 +62,7 @@ export function PulseStat({
 }) {
   return (
     <div
-      className={`rounded-2xl border px-3.5 py-3.5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-panel ${
+      className={`min-w-0 overflow-hidden rounded-2xl border px-3 py-3 shadow-soft sm:px-3.5 sm:py-3.5 ${
         warn
           ? 'border-amber-300/50 bg-amber-50/80'
           : accent
@@ -70,11 +70,11 @@ export function PulseStat({
             : 'border-navy-800/10 bg-white/85'
       }`}
     >
-      <div className="mb-2 flex items-center justify-between">
-        <Icon size={14} className={warn ? 'text-amber-700' : accent ? 'text-brand-400' : 'text-navy-800/40'} />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-navy-800/45">{label}</span>
+      <div className="mb-1.5 flex min-w-0 items-center gap-1.5">
+        <Icon size={14} className={`shrink-0 ${warn ? 'text-amber-700' : accent ? 'text-brand-400' : 'text-navy-800/40'}`} />
+        <span className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-navy-800/45">{label}</span>
       </div>
-      <p className="font-display text-2xl font-bold tabular-nums text-navy-900">{value ?? 0}</p>
+      <p className="font-display text-xl font-bold tabular-nums text-navy-900 sm:text-2xl">{value ?? 0}</p>
     </div>
   );
 }

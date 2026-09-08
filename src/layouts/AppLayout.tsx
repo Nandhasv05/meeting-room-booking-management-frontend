@@ -16,15 +16,17 @@ export function AppLayout() {
   }
   return (
     <ShellProvider>
-      <div className="app-shell flex h-[100dvh] overflow-hidden">
+      <div className="app-shell flex h-[100dvh] w-full max-w-[100%] overflow-hidden">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
           <Topbar />
           <main
             key={location.pathname}
-            className="page-enter flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-5"
+            className="page-enter min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-5"
           >
-            <Outlet />
+            <div className="mx-auto w-full min-w-0 max-w-full">
+              <Outlet />
+            </div>
           </main>
           <Footer />
         </div>

@@ -27,13 +27,13 @@ export function AdminDashboard({ data }: { data: Dash }) {
   const maxRole = Math.max(...usersByRole.map((r) => Number(r.Count) || 0), 1);
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="w-full min-w-0 space-y-4 sm:space-y-5">
       {/* <WelcomeBand
         kicker="Administrator"
         subtitle={`${s.ActiveUsers ?? 0} active users · ${s.TotalHalls ?? 0} halls · ${s.TodayBookings ?? 0} bookings today`}
       /> */}
 
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4 stagger">
+      <section className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 stagger">
         {/* <PulseStat icon={Users} label="Users" value={s.TotalUsers} /> */}
         <PulseStat icon={Users} label="Active" value={s.ActiveUsers} accent />
         <PulseStat icon={Building2} label="Halls" value={s.TotalHalls} />
@@ -42,8 +42,8 @@ export function AdminDashboard({ data }: { data: Dash }) {
         {/* <PulseStat icon={Wrench} label="Cancelled 30d" value={s.CancelledLast30} warn={(s.CancelledLast30 ?? 0) > 8} /> */}
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel animate-rise">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <section className="min-w-0 rounded-2xl border border-navy-800/10 bg-white/85 p-3 shadow-panel animate-rise sm:p-5">
           <h3 className="mb-4 font-display text-base font-semibold text-navy-900">People by role</h3>
           <ul className="space-y-3">
             {usersByRole.map((row) => {
@@ -63,7 +63,7 @@ export function AdminDashboard({ data }: { data: Dash }) {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel animate-rise">
+        <section className="min-w-0 rounded-2xl border border-navy-800/10 bg-white/85 p-3 shadow-panel animate-rise sm:p-5">
           <h3 className="mb-4 font-display text-base font-semibold text-navy-900">Bookings by department</h3>
           <ul className="space-y-3">
             {byDepartment.length === 0 ? (
@@ -88,28 +88,30 @@ export function AdminDashboard({ data }: { data: Dash }) {
         </section>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-2xl border border-navy-800/10 bg-white/85 p-5 shadow-panel animate-rise">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <section className="min-w-0 rounded-2xl border border-navy-800/10 bg-white/85 p-3 shadow-panel animate-rise sm:p-5">
           <h3 className="mb-1 font-display text-base font-semibold text-navy-900">Booking trend</h3>
           <p className="mb-3 text-xs text-navy-800/50">Last 30 days</p>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={trend}>
-              <defs>
-                <linearGradient id="adminTrend" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2F7A4E" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#2F7A4E" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#d3ded7" vertical={false} />
-              <XAxis dataKey="Period" tick={{ fontSize: 10 }} tickFormatter={(v) => String(v).slice(5)} />
-              <YAxis allowDecimals={false} width={28} tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Area type="monotone" dataKey="Count" stroke="#122315" strokeWidth={2} fill="url(#adminTrend)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="h-[180px] w-full min-w-0 sm:h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trend}>
+                <defs>
+                  <linearGradient id="adminTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2F7A4E" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#2F7A4E" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#d3ded7" vertical={false} />
+                <XAxis dataKey="Period" tick={{ fontSize: 10 }} tickFormatter={(v) => String(v).slice(5)} />
+                <YAxis allowDecimals={false} width={28} tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Area type="monotone" dataKey="Count" stroke="#122315" strokeWidth={2} fill="url(#adminTrend)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-navy-800/10 bg-white/85 shadow-panel">
+        <section className="min-w-0 overflow-hidden rounded-2xl border border-navy-800/10 bg-white/85 shadow-panel">
           <div className="border-b border-navy-800/8 px-4 py-3.5">
             <h3 className="font-display text-base font-semibold text-navy-900">Recent bookings</h3>
           </div>

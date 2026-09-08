@@ -183,7 +183,7 @@ export function Composer({
 
           <Row icon={MapPin}>
             <div className="flex flex-wrap items-center gap-1.5">
-              <select className={`${bare} min-w-[13rem]`} {...register('hallId')}>
+              <select className={`${bare} w-full min-w-0 sm:w-auto sm:min-w-[13rem]`} {...register('hallId')}>
                 <option value="">Add a room or location</option>
                 {halls.map((h) => (
                   <option key={h.Id} value={h.Id}>
@@ -227,7 +227,7 @@ export function Composer({
                   <option key={t}>{t}</option>
                 ))}
               </select>
-              <select className={`${bare} min-w-[11rem]`} {...register('departmentId')}>
+              <select className={`${bare} w-full min-w-0 sm:w-auto sm:min-w-[11rem]`} {...register('departmentId')}>
                 <option value="">Select department</option>
                 {departments.map((d) => (
                   <option key={d.Id} value={d.Id}>
@@ -235,7 +235,7 @@ export function Composer({
                   </option>
                 ))}
               </select>
-              <input type="email" placeholder="Organizer mail ID" className={`${bare} min-w-[13rem]`} {...register('mailId')} />
+              <input type="email" placeholder="Organizer mail ID" className={`${bare} w-full min-w-0 sm:w-auto sm:min-w-[13rem]`} {...register('mailId')} />
             </div>
             {signedIn ? (
               <p className="mt-1 text-xs text-navy-800/45">
