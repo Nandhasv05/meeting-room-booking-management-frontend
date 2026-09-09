@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { userSsoStart, userSignInResponseResetStart } from '../../redux/login/login.action';
 import { selectLoginLoading, selectLoginResponse, selectIsAuthenticated } from '../../redux/login/login.selector';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { PORTAL_LOGIN_URL } from '../../redux/const';
+import { PORTAL_LAUNCH_URL } from '../../redux/const';
 import { LogoSpinner } from '../brand/LogoSpinner';
 
 export function readSsoTicket(search: string): string {
@@ -20,15 +20,23 @@ export function isLocalHost(): boolean {
 }
 
 export function goToPortalLogin() {
-  window.location.replace(PORTAL_LOGIN_URL);
+  window.location.replace(PORTAL_LAUNCH_URL);
 }
 
-function stripSsoFromUrl() {
-  const url = new URL(window.location.href);
-  url.searchParams.delete('sso');
-  url.searchParams.delete('token');
-  const next = `${url.pathname}${url.search}${url.hash}`;
-  window.history.replaceState({}, '', next);
+export function clearClientCache() {
+  try {
+    localStorage.clear();
+  } catch {
+    /* ignore blocked storage */
+  }
+  try {
+    sessionStorage.clear();
+  } catch {
+    /* ignore blocked storage */
+  }
+  if (typeof caches !== 'undefined' && typeof caches.keys === 'function') {
+    void caches.keys().then((keys) => Promise.all(keys.map((name) => caches.delete(name)))).catch(() => undefined);
+  }
 }
 
 export function PortalSsoListener() {
@@ -42,28 +50,24 @@ export function PortalSsoListener() {
   const started = useRef('');
 
   useEffect(() => {
-    if (!ticket || authenticated || started.current === ticket) return;
+    if (!ticket || started.current === ticket) return;
     started.current = ticket;
     dispatch(userSsoStart(ticket));
-  }, [ticket, authenticated, dispatch]);
+  }, [ticket, dispatch]);
 
   useEffect(() => {
     if (!loginResponse || !started.current) return;
     dispatch(userSignInResponseResetStart());
     if (loginResponse.success) {
       toast.success('Welcome back.');
-      stripSsoFromUrl();
-      navigate('/', { replace: true });
+      navigate({ pathname: '/', search: '' }, { replace: true });
       return;
     }
     toast.error(loginResponse.message || 'Portal sign-in failed.');
-    stripSsoFromUrl();
-    started.current = '';
-    if (isLocalHost()) navigate('/login', { replace: true });
-    else goToPortalLogin();
+    goToPortalLogin();
   }, [loginResponse, dispatch, navigate]);
 
-  if (ticket && !authenticated) {
+  if (ticket && (!authenticated || loginLoading || started.current === ticket)) {
     return <LogoSpinner fullScreen light={false} label={loginLoading ? 'Opening Meeting Hall…' : 'Signing in…'} size="lg" />;
   }
   return null;

@@ -20,6 +20,8 @@ html,
 body,
 #root {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
 }
 
 body {
@@ -29,30 +31,41 @@ body {
     radial-gradient(1000px 480px at 6% -6%, rgba(47, 122, 78, 0.1), transparent 55%),
     radial-gradient(800px 420px at 100% 0%, rgba(18, 35, 21, 0.06), transparent 50%),
     linear-gradient(165deg, #f6f8f7 0%, #e8f0eb 50%, #e2ebe5 100%);
-  background-attachment: fixed;
+  background-attachment: scroll;
   font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+@media (min-width: 768px) {
+  body {
+    background-attachment: fixed;
+  }
 }
 
 .app-shell {
   position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 100%;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+.recharts-responsive-container {
+  width: 100% !important;
+  min-width: 0 !important;
 }
 
 .app-shell::before {
   content: '';
   pointer-events: none;
-  position: fixed;
+  position: absolute;
   inset: 0;
   background-image:
     linear-gradient(rgba(18, 35, 21, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(18, 35, 21, 0.025) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 78%);
-  z-index: 0;
-}
-
-.app-shell > * {
-  position: relative;
-  z-index: 1;
+  z-index: -1;
 }
 
 .panel {
@@ -322,6 +335,7 @@ body {
 
 /* Stagger children on pages */
 .stagger > * {
+  min-width: 0;
   animation: rise 0.4s ease-out both;
 }
 .stagger > *:nth-child(1) {

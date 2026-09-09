@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_BASE?: string;
   readonly VITE_PORTAL_HOME_URL?: string;
   readonly VITE_PORTAL_LOGIN_URL?: string;
+  readonly VITE_PORTAL_LAUNCH_URL?: string;
+  readonly VITE_PORTAL_LOGOUT_URL?: string;
 }
 
 interface ImportMeta {

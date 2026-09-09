@@ -9,7 +9,7 @@ import type { Paged } from '../../types/api';
 import { celebrate } from '../../components/ui/SuccessFx';
 import { EmptyState, Spinner, StatusBadge } from '../../components/ui/Feedback';
 import { Field, GhostButton, inputClass, Offcanvas, PrimaryButton } from '../../components/ui/Form';
-import { DataTable, SearchField, Toolbar, type Column } from '../../components/ui/Surface';
+import { DataTable, Pagination, SearchField, Toolbar, type Column } from '../../components/ui/Surface';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { useAuth } from '../../hooks/useAuth';
 import { isAdminRole } from '../../utils/roles';
@@ -46,6 +46,8 @@ import {
   type UserRow,
   initials,
 } from '../../helpers/setting/userValidation';
+
+const PAGE_SIZE = 10;
 
 function asDepartments(value: unknown): Department[] {
   if (Array.isArray(value)) return value as Department[];
@@ -109,6 +111,7 @@ export function UsersPage() {
   const admin = isAdminRole(actor?.roleCode);
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [page, setPage] = useState(1);
   const [mode, setMode] = useState<'closed' | 'create' | 'edit'>('closed');
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -132,8 +135,8 @@ export function UsersPage() {
   const modules = permissionModules(ADMIN_PERMISSIONS);
 
   useEffect(() => {
-    dispatch(fetchUsersStart({ q, roleId: roleFilter || undefined, pageSize: 50 }));
-  }, [q, roleFilter, dispatch]);
+    dispatch(fetchUsersStart({ q, roleId: roleFilter || undefined, page, pageSize: PAGE_SIZE }));
+  }, [q, roleFilter, page, dispatch]);
 
   useEffect(() => {
     dispatch(fetchDepartmentsStart({ all: true }));
@@ -150,8 +153,8 @@ export function UsersPage() {
   }, [departments, form, mode]);
 
   const reload = useCallback(() => {
-    dispatch(fetchUsersStart({ q, roleId: roleFilter || undefined, pageSize: 50 }));
-  }, [dispatch, q, roleFilter]);
+    dispatch(fetchUsersStart({ q, roleId: roleFilter || undefined, page, pageSize: PAGE_SIZE }));
+  }, [dispatch, q, roleFilter, page]);
 
   const closePanel = useCallback(() => {
     setMode('closed');
@@ -319,11 +322,21 @@ export function UsersPage() {
   return (
     <div>
       <Toolbar>
-        <SearchField value={q} onChange={setQ} placeholder="Search by username or email" />
+        <SearchField
+          value={q}
+          onChange={(next) => {
+            setQ(next);
+            setPage(1);
+          }}
+          placeholder="Search by username or email"
+        />
         <select
           className={`${inputClass} sm:max-w-[12rem]`}
           value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
+          onChange={(e) => {
+            setRoleFilter(e.target.value);
+            setPage(1);
+          }}
           aria-label="Filter by role"
         >
           <option value="">All roles</option>
@@ -340,12 +353,20 @@ export function UsersPage() {
           </PrimaryButton>
         </div>
       </Toolbar>
-      {isLoading ? (
+      {isLoading && !rows.length ? (
         <Spinner />
       ) : !rows.length ? (
         <EmptyState title="No users found" hint="Add a user, or adjust the search." />
       ) : (
-        <DataTable columns={columns} rows={rows} rowKey={(u) => u.Id} onRowClick={openEdit} />
+        <>
+          <DataTable columns={columns} rows={rows} rowKey={(u) => u.Id} onRowClick={openEdit} />
+          <Pagination
+            page={data?.page ?? page}
+            pageSize={data?.pageSize ?? PAGE_SIZE}
+            total={data?.total ?? rows.length}
+            onPageChange={setPage}
+          />
+        </>
       )}
 
       <Offcanvas

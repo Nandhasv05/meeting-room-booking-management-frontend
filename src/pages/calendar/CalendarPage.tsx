@@ -40,7 +40,9 @@ export function CalendarPage() {
   const [hallId, setHallId] = useState('');
   const [range, setRange] = useState({ from: '', to: '' });
   const [title, setTitle] = useState('');
-  const [viewId, setViewId] = useState('workWeek');
+  const [viewId, setViewId] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'agenda' : 'workWeek',
+  );
   const [menu, setMenu] = useState<'view' | 'filter' | null>(null);
 
   /******* EFFECTS *******/
@@ -94,7 +96,7 @@ export function CalendarPage() {
   };
 
   return (
-    <div className="animate-rise">
+    <div className="min-w-0 animate-rise">
       <div className="overflow-hidden rounded-2xl border border-navy-800/10 bg-white shadow-panel">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-navy-800/8 bg-mist/40 px-2.5 py-2 sm:px-3">
           <div className="flex flex-wrap items-center gap-1">
@@ -185,7 +187,7 @@ export function CalendarPage() {
           </div>
         </div>
 
-        <div className="p-2 sm:p-3">
+        <div className="min-w-0 overflow-x-auto p-2 sm:p-3">
           {isLoading && !data ? <Spinner /> : null}
           <FullCalendar
             ref={calRef}
@@ -201,6 +203,8 @@ export function CalendarPage() {
             slotMinTime="07:00:00"
             slotMaxTime="21:00:00"
             expandRows
+            handleWindowResize
+            windowResizeDelay={80}
             selectable={can('bookings.create')}
             datesSet={(arg) => {
               setTitle(arg.view.title);

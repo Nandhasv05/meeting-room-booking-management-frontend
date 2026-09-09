@@ -7,13 +7,17 @@ import { BrandLogo } from '../../components/brand/BrandLogo';
 import { GhostButton, PrimaryButton } from '../../components/ui/Form';
 import { useAppSelector } from '../../store';
 import { selectCurrentUser } from '../../redux/login/login.selector';
+import { PORTAL_LAUNCH_URL } from '../../redux/const';
 
 export function NotFoundPage() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const user = useAppSelector(selectCurrentUser);
   const signedIn = Boolean(user);
-  const homeTo = signedIn ? '/' : '/login';
+  const goHome = () => {
+    if (signedIn) navigate('/', { replace: true });
+    else window.location.assign(PORTAL_LAUNCH_URL);
+  };
 
   return (
     <div className="nf-page">
@@ -24,7 +28,7 @@ export function NotFoundPage() {
       <div className="nf-scan" aria-hidden />
 
       <header className="nf-top">
-        <BrandLogo variant="light" height={28} to={homeTo} />
+        <BrandLogo variant="light" height={28} to={signedIn ? '/' : null} />
         <p className="nf-kicker">Conference halls</p>
       </header>
 
@@ -60,7 +64,7 @@ export function NotFoundPage() {
             <ArrowLeft size={16} />
             Go back
           </GhostButton>
-          <PrimaryButton type="button" className="!bg-brand-400 hover:!bg-signal" onClick={() => navigate(homeTo)}>
+          <PrimaryButton type="button" className="!bg-brand-400 hover:!bg-signal" onClick={goHome}>
             {signedIn ? 'Back to home' : 'Sign in'}
           </PrimaryButton>
           {signedIn ? (

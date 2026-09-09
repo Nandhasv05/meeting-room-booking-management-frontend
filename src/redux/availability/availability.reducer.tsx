@@ -17,6 +17,7 @@ const availabilityReducer = (state = INITIAL_STATE, action: any) => {
 			return {
 				...state,
 				availabilityLoading: true,
+				availability: null,
 			};
 		case availabilityActionTypes.CHECK_AVAILABILITY_SUCCESS:
 			return {
@@ -24,10 +25,11 @@ const availabilityReducer = (state = INITIAL_STATE, action: any) => {
 				availabilityLoading: false,
 				availability: action.payload?.data ?? null,
 			};
-		case availabilityActionTypes.CHECK_AVAILABILITY_FAILURE:
+        case availabilityActionTypes.CHECK_AVAILABILITY_FAILURE:
 			return {
 				...state,
 				availabilityLoading: false,
+				availability: null,
 			};
 		case availabilityActionTypes.CHECK_AVAILABILITY_RESPONSE_CHANGED:
 			return {

@@ -7,7 +7,8 @@ import { useShell } from './ShellContext';
 import { fetchNotificationsStart } from '../../redux/notifications/notifications.action';
 import { selectNotifications } from '../../redux/notifications/notifications.selector';
 import { selectCurrentUser } from '../../redux/login/login.selector';
-import { PORTAL_HOME_URL } from '../../redux/const';
+import { PORTAL_HOME_URL, PORTAL_LOGOUT_URL } from '../../redux/const';
+import { clearClientCache } from '../portal/PortalSsoListener';
 
 const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/contacts/, title: 'Contact' },
@@ -117,12 +118,13 @@ export function Topbar() {
 
   const signOut = () => {
     setMenuOpen(false);
+    clearClientCache();
     dispatch(userSignInLogOutStart());
-    window.location.assign(PORTAL_HOME_URL);
+    window.location.assign(PORTAL_LOGOUT_URL);
   };
 
   return (
-    <header className="relative z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-navy-800/10 bg-white/80 px-3 backdrop-blur-md sm:px-4 md:px-5">
+    <header className="relative z-30 flex h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-navy-800/10 bg-white/80 px-3 backdrop-blur-md sm:gap-3 sm:px-4 md:px-5">
       {/* Left — page name */}
       <div className="flex min-w-0 items-center gap-2">
         <button
