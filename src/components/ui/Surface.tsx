@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 export function Card({
   children,
@@ -171,6 +171,76 @@ export function ListCard({ children, className = '' }: { children: ReactNode; cl
     >
       {children}
     </ul>
+  );
+}
+
+export function Pagination({
+  page,
+  pageSize,
+  total,
+  onPageChange,
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (next: number) => void;
+}) {
+  const size = Math.max(1, pageSize);
+  const pageCount = Math.max(1, Math.ceil(total / size));
+  const current = Math.min(Math.max(1, page), pageCount);
+  if (total <= 0) return null;
+
+  const from = (current - 1) * size + 1;
+  const to = Math.min(current * size, total);
+  const windowSize = 5;
+  let start = Math.max(1, current - 2);
+  const end = Math.min(pageCount, start + windowSize - 1);
+  start = Math.max(1, end - windowSize + 1);
+  const numbers = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+  const btn =
+    'grid h-8 min-w-8 place-items-center rounded-lg px-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-35';
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-navy-800/10 bg-white/85 px-3 py-2 shadow-soft">
+      <p className="text-xs font-medium text-navy-800/55">
+        Showing <span className="font-semibold text-navy-900">{from}–{to}</span> of{' '}
+        <span className="font-semibold text-navy-900">{total}</span>
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className={`${btn} text-navy-800 hover:bg-mist`}
+          disabled={current <= 1}
+          onClick={() => onPageChange(current - 1)}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        {numbers.map((n) => (
+          <button
+            key={n}
+            type="button"
+            className={`${btn} ${
+              n === current ? 'bg-navy-900 text-white' : 'text-navy-800 hover:bg-mist'
+            }`}
+            onClick={() => onPageChange(n)}
+            aria-current={n === current ? 'page' : undefined}
+          >
+            {n}
+          </button>
+        ))}
+        <button
+          type="button"
+          className={`${btn} text-navy-800 hover:bg-mist`}
+          disabled={current >= pageCount}
+          onClick={() => onPageChange(current + 1)}
+          aria-label="Next page"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
   );
 }
 

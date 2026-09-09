@@ -16,6 +16,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: { '@': path.resolve(root, 'src') },
     },
+    css: {
+      postcss: path.resolve(root, 'postcss.config.js'),
+    },
     server: {
       port: 5173,
       proxy: {

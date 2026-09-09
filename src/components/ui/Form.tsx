@@ -1,4 +1,21 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { useEffect, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+
+function useLayerLock(open: boolean, onClose: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open, onClose]);
+}
 
 export function Modal({
   open,
@@ -13,11 +30,24 @@ export function Modal({
   onClose: () => void;
   footer?: ReactNode;
 }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/55 p-4 backdrop-blur-sm">
-      <button className="absolute inset-0 cursor-default" aria-label="Close" onClick={onClose} />
-      <div className="relative z-10 max-h-[88vh] w-full max-w-lg overflow-hidden rounded-3xl border border-navy-800/10 bg-white shadow-lift animate-rise">
+  useLayerLock(open, onClose);
+  if (!open || typeof document === 'undefined') return null;
+  return createPortal(
+    <div
+      className="flex items-center justify-center p-4"
+      style={{ position: 'fixed', inset: 0, zIndex: 200 }}
+    >
+      <button
+        type="button"
+        className="cursor-default bg-navy-950/55"
+        style={{ position: 'absolute', inset: 0, border: 0 }}
+        aria-label="Close"
+        onClick={onClose}
+      />
+      <div
+        className="relative z-10 max-h-[88vh] w-full max-w-lg overflow-hidden rounded-3xl border border-navy-800/10 bg-white shadow-lift animate-rise"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-navy-800/8 px-5 py-4">
           <h2 className="font-display text-lg font-semibold text-navy-900">{title}</h2>
           <button
@@ -31,7 +61,8 @@ export function Modal({
         <div className="soft-scroll max-h-[62vh] overflow-y-auto px-5 py-4">{children}</div>
         {footer ? <div className="border-t border-navy-800/8 bg-mist/30 px-5 py-3">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -50,11 +81,23 @@ export function Offcanvas({
   onClose: () => void;
   footer?: ReactNode;
 }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <button className="absolute inset-0 cursor-default bg-navy-950/45 backdrop-blur-sm" aria-label="Close" onClick={onClose} />
-      <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-navy-800/10 bg-white shadow-lift animate-offcanvas">
+  useLayerLock(open, onClose);
+  if (!open || typeof document === 'undefined') return null;
+  return createPortal(
+    <div className="flex justify-end" style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
+      <button
+        type="button"
+        className="cursor-default bg-navy-950/45"
+        style={{ position: 'absolute', inset: 0, border: 0 }}
+        aria-label="Close"
+        onClick={onClose}
+      />
+      <aside
+        className="relative z-10 flex h-full w-full max-w-lg flex-col border-l border-navy-800/10 bg-white shadow-lift animate-offcanvas"
+        style={{ height: '100dvh', maxWidth: 'min(32rem, 100vw)' }}
+        onClick={(event) => event.stopPropagation()}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <div className="flex items-start justify-between gap-3 border-b border-navy-800/8 px-5 py-4">
           <div className="min-w-0">
             <h2 className="font-display text-lg font-semibold text-navy-900">{title}</h2>
@@ -71,7 +114,8 @@ export function Offcanvas({
         <div className="soft-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
         {footer ? <div className="border-t border-navy-800/8 bg-mist/30 px-5 py-3">{footer}</div> : null}
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
