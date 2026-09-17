@@ -1,7 +1,14 @@
+/**
+ * AUTHOR: NANDHAKUMAR S V
+ * DATE : 17/09/2026
+ * DESCRPTION: CREATE FILE FOR BOOKING VALIDATION 
+ */
 import { differenceInMinutes } from 'date-fns';
 
 export type Guest = { Id: string; Name: string; Email: string; Department: string | null };
 
+
+/*** Duration Label Handle Funtion  */
 export function durationLabel(start: Date, end: Date) {
   const mins = Math.max(0, differenceInMinutes(end, start));
   const hours = Math.floor(mins / 60);
@@ -11,6 +18,7 @@ export function durationLabel(start: Date, end: Date) {
   return `${rem}m`;
 }
 
+/*** Initials Function Handle **/
 export function initials(name: string) {
   return name
     .split(/\s+/)
@@ -20,7 +28,7 @@ export function initials(name: string) {
     .join('');
 }
 
-
+/*** Booking Tabs **/
 export const tabs = [
     ['upcoming', 'Upcoming'],
     ['today', 'Today'],

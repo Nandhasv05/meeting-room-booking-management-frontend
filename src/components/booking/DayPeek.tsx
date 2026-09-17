@@ -1,3 +1,8 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE THE USER VALIDATION
+ */
 import { useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchCalendarStart } from '../../redux/calendar/calendar.action';
 import { selectCalendar } from '../../redux/calendar/calendar.selector';
 
+/********** DAY EVENT TYPE  *********** */
 export type day_event_type = {
   Id: string;
   EventName: string;
@@ -19,19 +25,23 @@ export type day_event_type = {
 const HOUR_PX = 56;
 const SNAP_MIN = 15;
 
+/********** PAD 2 *********** */
 function pad2(n: number) {
   return String(n).padStart(2, '0');
 }
 
+/********** TO LOCAL DATE *********** */
 function toLocalDate(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
+/********** HHMM *********** */
 function hhmm(minutes: number) {
   const m = Math.max(0, Math.min(24 * 60 - 1, minutes));
   return `${pad2(Math.floor(m / 60))}:${pad2(m % 60)}`;
 }
 
+/********** MIN OF  *********** */
 function minutesOf(time: string) {
   const [h, m] = time.split(':').map(Number);
   return (h ?? 0) * 60 + (m ?? 0);

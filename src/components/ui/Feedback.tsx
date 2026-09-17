@@ -1,6 +1,12 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : 
+ * */
 import type { ReactNode } from 'react';
 import { LogoSpinner } from '../brand/LogoSpinner';
 
+/** loading Flags ****/
 const tones: Record<string, string> = {
   AVAILABLE: 'bg-signal/12 text-signal ring-signal/20',
   BOOKED: 'bg-navy-700/8 text-navy-700 ring-navy-700/15',
@@ -21,6 +27,8 @@ const tones: Record<string, string> = {
   SCHEDULED: 'bg-brand-50 text-brand-700 ring-brand-400/20',
 };
 
+
+/** Status Baged Records ****/
 export function StatusBadge({ value }: { value: string }) {
   return (
     <span
@@ -33,6 +41,8 @@ export function StatusBadge({ value }: { value: string }) {
   );
 }
 
+
+/** Page Header****/
 export function PageHeader({
   title,
   description,
@@ -53,6 +63,8 @@ export function PageHeader({
   );
 }
 
+
+/** Empty State ****/
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-navy-800/18 bg-white/50 px-6 py-14 text-center">
@@ -62,10 +74,12 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   );
 }
 
+/** Loading Spinner ****/
 export function Spinner({ label = 'Loading…' }: { label?: string }) {
   return <LogoSpinner label={label} size="lg" />;
 }
 
+/** Error State Spinner ****/
 export function ErrorState({ message }: { message: string }) {
   return (
     <div className="rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3.5 text-sm font-medium text-rose-800">

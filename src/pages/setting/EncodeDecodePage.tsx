@@ -12,6 +12,11 @@ import { decryptData, encryptDataV2, isDecryptFailure } from '../../redux/_commo
 
 const textareaClass = `${inputClass} min-h-[180px] resize-y font-mono text-[13px] leading-relaxed`;
 
+/**
+ * Extract the cipher from the raw text
+ * @param raw - The raw text to extract the cipher from
+ * @returns The cipher
+ */
 function extractCipher(raw: string): string {
   const text = raw.trim();
   if (!text) return '';
@@ -25,16 +30,29 @@ function extractCipher(raw: string): string {
   return text.replace(/^["']|["']$/g, '').trim();
 }
 
+/**
+ * Pretty print the value
+ * @param value - The value to pretty print
+ * @returns The pretty printed value
+ */
 function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
+/**
+ * Copy the text to the clipboard
+ * @param value - The text to copy
+ * @param label - The label of the text
+ */
 async function copyText(value: string, label: string) {
   if (!value) return;
   await navigator.clipboard.writeText(value);
   toast.success(`${label} copied`);
 }
 
+/**
+ * The EncodeDecodePage component
+ */
 export function EncodeDecodePage() {
   const [key, setKey] = useState(API_CRYPTO_KEY);
   const [cipherIn, setCipherIn] = useState('');
@@ -187,6 +205,9 @@ export function EncodeDecodePage() {
   );
 }
 
+/**
+ * The EncodeDecodeStandalonePage component
+ */
 export function EncodeDecodeStandalonePage() {
   return (
     <div className="min-h-[100dvh] bg-[#f6f8f7] px-4 py-8">

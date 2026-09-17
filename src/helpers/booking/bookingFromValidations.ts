@@ -1,6 +1,13 @@
+/**
+ *  AUTHOR: NANDHAKUMAR S V
+ *  DATE : 17/9/2026
+ * DESCRIPTION: ADD AUDIT LOG TYPES
+**/
+
 import { z } from 'zod';
 import type { PickedEmployee } from '../../components/booking/EmployeePicker';
 
+/**** Booking From Validation *******/
 export type Values = {
   name: string;
   eventType: string;
@@ -16,6 +23,7 @@ export type Values = {
   purpose: string;
 };
 
+/**** Local Slot Validation *******/
 function localSlot(date: string, time: string): Date {
   const clock = /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time;
   return new Date(`${date}T${clock}`);
@@ -24,6 +32,7 @@ function localSlot(date: string, time: string): Date {
 export const MAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z0-9]{2,}/gi;
 export const MAIL_EXACT = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z0-9]{2,}$/i;
 
+/**** Clean Mail Test *******/
 export function cleanMailText(value: string | null | undefined): string {
   return String(value ?? '')
     .normalize('NFKC')
@@ -32,10 +41,12 @@ export function cleanMailText(value: string | null | undefined): string {
     .trim();
 }
 
+/**** Is MailID Valadation *******/
 export function isMailId(value: string | null | undefined): boolean {
   return MAIL_EXACT.test(cleanMailText(value).toLowerCase());
 }
 
+/**** Zod Type Schema *******/
 export const schema: z.ZodType<Values> = z
   .object({
     name: z.string().min(1, 'Title is required'),
@@ -75,10 +86,12 @@ export const schema: z.ZodType<Values> = z
     { message: 'Choose a start time in the future (not earlier today).', path: ['startTime'] },
   );
 
+/**** Pad2 *******/
 export function pad2(n: number) {
   return String(n).padStart(2, '0');
 }
 
+/**** ToLocal Date *******/
 export function toLocalDate(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
@@ -116,12 +129,14 @@ export function parseEmails(raw: string): string[] {
   return [...new Set(found)];
 }
 
+/**** Slot Iso Function Handle *******/
 export function slotIso(date: string, time: string): string | undefined {
   if (!date || !time) return undefined;
   const d = localSlot(date, time);
   return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 }
 
+/*** Duration Label Handle Funtion  */
 export function durationLabel(startAt?: string, endAt?: string) {
   if (!startAt || !endAt) return '—';
   const mins = Math.round((new Date(endAt).getTime() - new Date(startAt).getTime()) / 60000);

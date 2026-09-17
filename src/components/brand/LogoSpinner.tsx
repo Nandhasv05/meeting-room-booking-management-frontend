@@ -1,10 +1,14 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE STAGE CREATION THIS COMPONENT IS USED TO DISPLAY THE TIME AND DATE IN THE BOOKING COMPOSER
+ */
 import { LOGO_SRC } from './BrandLogo';
 
 type Props = {
   label?: string;
   fullScreen?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  /** Use on dark backgrounds */
   light?: boolean;
 };
 

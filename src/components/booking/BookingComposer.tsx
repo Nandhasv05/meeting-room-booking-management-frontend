@@ -1,3 +1,8 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE THE USER VALIDATION
+ */
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
@@ -31,9 +36,11 @@ import {
   type Values,
 } from '../../helpers/booking/bookingFromValidations';
 
+/**** BARE ********/
 export const bare =
   'rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-ink outline-none transition hover:border-navy-800/10 focus:border-brand-400 focus:bg-white placeholder:text-navy-800/35';
 
+/********** COMPOSER *********** */
 export function Composer({
   halls,
   departments,
@@ -287,6 +294,7 @@ export function Composer({
   );
 }
 
+/********** ROW *********** */
 function Row({
   icon: Icon,
   children,
@@ -304,11 +312,13 @@ function Row({
   );
 }
 
+/********** FILED ERROR *********** */
 export function FieldError({ show, message }: { show?: boolean; message?: string }) {
   if (!show || typeof message !== 'string' || !message) return null;
   return <p className="mt-1 text-xs text-rose-700">{message}</p>;
 }
 
+/********** INVITE PREVIEW *********** */
 export function InvitePreview({
   employees,
   extraEmails,
@@ -343,6 +353,7 @@ export function InvitePreview({
 
 type SlotState = 'idle' | 'checking' | 'free' | 'busy';
 
+/********** STATUS PILL *********** */
 export function StatusPill({ state }: { state: SlotState }) {
   if (state === 'idle') return null;
   if (state === 'checking') {

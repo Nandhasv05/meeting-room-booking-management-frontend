@@ -1,8 +1,14 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : ACTIVITY SHEEL 
+ */
 import { useEffect, useState } from 'react';
 import { LogoSpinner } from '../brand/LogoSpinner';
 import { useAppSelector } from '../../store';
 import type { RootState } from '../../redux/root-reducer';
 
+/** loading Flags ****/
 function loadingFlags(state: RootState): string[] {
   const flags: string[] = [];
   for (const slice of Object.values(state) as any[]) {
@@ -14,6 +20,7 @@ function loadingFlags(state: RootState): string[] {
   return flags;
 }
 
+/** Ismution flag ****/
 function isMutationFlag(key: string) {
   return /^(login|save|create|update|delete|cancel|readAll|testMail)/i.test(key);
 }
@@ -44,6 +51,7 @@ export function GlobalProgress() {
   );
 }
 
+/** handle with boot splash screen function ****/
 export function hideBootSplash() {
   const el = document.getElementById('boot-splash');
   if (!el) return;

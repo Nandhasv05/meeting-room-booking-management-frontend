@@ -1,6 +1,8 @@
-// AUTHOR : NANDHAKUMAR S V
-// DATE : 31/08/2026
-// DESCRIPTION : Exchange an EVOL portal SSO ticket for a Meeting Hall session
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE STAGE CREATION THIS COMPONENT IS USED TO DISPLAY THE TIME AND DATE IN THE BOOKING COMPOSER
+ */
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -10,19 +12,23 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { PORTAL_LAUNCH_URL } from '../../redux/const';
 import { LogoSpinner } from '../brand/LogoSpinner';
 
+/**** READ SSO TICKET ***** */
 export function readSsoTicket(search: string): string {
   const q = new URLSearchParams(search);
   return (q.get('sso') || q.get('token') || '').trim();
 }
 
+/**** IS LOCAL HOST ***** */
 export function isLocalHost(): boolean {
   return ['localhost', '127.0.0.1'].includes(window.location.hostname);
 }
 
+/**** GO TO PORTAL LOGIN ***** */
 export function goToPortalLogin() {
   window.location.replace(PORTAL_LAUNCH_URL);
 }
 
+/**** CLEAR CLINET CACHE ***** */
 export function clearClientCache() {
   try {
     localStorage.clear();
@@ -39,6 +45,7 @@ export function clearClientCache() {
   }
 }
 
+/**** PORTAL SSO LISTENER ***** */
 export function PortalSsoListener() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

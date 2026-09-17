@@ -1,3 +1,8 @@
+/**
+ * AUTHOR : NANDHAKUMAR
+ * DATE : 17/09/2026
+ * DESC: CREATE THIS FILE 
+ **/
 import { useEffect, useState } from 'react';
 
 type Payload = { id: number; title: string; detail?: string };

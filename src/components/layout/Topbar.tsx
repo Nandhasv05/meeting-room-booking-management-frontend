@@ -1,3 +1,8 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE STAGE CREATION THIS COMPONENT IS USED TO DISPLAY THE TIME AND DATE IN THE TOPBAR COMPOSER
+ */
 import { Bell, Home, LogOut, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -10,6 +15,7 @@ import { selectCurrentUser } from '../../redux/login/login.selector';
 import { PORTAL_HOME_URL, PORTAL_LOGOUT_URL } from '../../redux/const';
 import { clearClientCache } from '../portal/PortalSsoListener';
 
+/**** PAGE TITLES ***** */
 const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/contacts/, title: 'Contact' },
   { match: /^\/bookings\/new/, title: 'New booking' },
@@ -24,6 +30,7 @@ const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/events\/[^/]+/, title: 'Event detail' },
   { match: /^\/events/, title: 'Events' },
   { match: /^\/displays/, title: 'Displays' },
+  { match: /^\/reports\/utilization/, title: 'Utilization Report' },
   { match: /^\/reports/, title: 'Reports' },
   { match: /^\/notifications/, title: 'Notifications' },
   { match: /^\/admin\/users/, title: 'Users & roles' },
@@ -34,6 +41,7 @@ const PAGE_TITLES: { match: RegExp | string; title: string }[] = [
   { match: /^\/admin\/audit/, title: 'Audit logs' },
 ];
 
+/**** HANDLE PAGE TITLE ***** */
 function pageTitle(pathname: string): string {
   if (/^\/dashboard/.test(pathname)) {
     return 'Admin dashboard';
@@ -46,6 +54,7 @@ function pageTitle(pathname: string): string {
   return 'evolv';
 }
 
+/**** HANDLE WITH FORMAT CLOCK ***** */
 function formatClock(d: Date) {
   return d.toLocaleString('en-IN', {
     weekday: 'short',
@@ -58,12 +67,14 @@ function formatClock(d: Date) {
   });
 }
 
+/**** HANDLE WITH INTIALS VALUES ***** */
 function initials(first?: string, last?: string) {
   const a = (first?.[0] ?? '').toUpperCase();
   const b = (last?.[0] ?? '').toUpperCase();
   return (a + b || 'U').slice(0, 2);
 }
 
+/**** HANDLE TOPBAR FUNCTONS ***** */
 export function Topbar() {
   const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();

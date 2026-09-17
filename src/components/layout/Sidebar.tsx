@@ -1,7 +1,8 @@
-// DATE : 01/09/2026
-// DESCRIPTION : Sidebar component
-// Author : NANDHAKUMAR S V
-// Version : 0.0.1
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE STAGE SIDE BAR CREATION THIS COMPONENT IS USED TO DISPLAY THE TIME AND DATE IN THE BOOKING COMPOSER
+ */
 import { NavLink } from 'react-router-dom';
 import {
   CalendarDays,
@@ -15,6 +16,7 @@ import {
   Shield,
   X,
   ChartBar,
+  BarChart3,
   Contact,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -24,6 +26,7 @@ import { isAdminRole } from '../../utils/roles';
 import { BrandLogo } from '../brand/BrandLogo';
 import { useShell } from './ShellContext';
 
+/****  ITEM ***** */
 function Item({ to, label, icon: Icon }: { to: string; label: string; icon: typeof CalendarDays }) {
   const { setNavOpen } = useShell();
   return (
@@ -44,6 +47,7 @@ function Item({ to, label, icon: Icon }: { to: string; label: string; icon: type
   );
 }
 
+/**** GROUP ***** */
 function Group({
   label,
   icon: Icon,
@@ -72,6 +76,7 @@ function Group({
   );
 }
 
+/**** NAV BODY ***** */
 function NavBody() {
   const { can, user } = usePermission();
   const admin = isAdminRole(user?.roleCode);
@@ -93,6 +98,7 @@ function NavBody() {
           <Item to="/admin/roles" label="Roles" icon={Shield} />
           <Item to="/admin/departments" label="Departments" icon={Users} />
           <Item to="/reports" label="Reports" icon={ChartBar} />
+          <Item to="/reports/utilization" label="Utilization Report" icon={BarChart3} />
           <Item to="/admin/audit" label="Audit" icon={ClipboardList} />
         </Group>
       )}
@@ -100,6 +106,7 @@ function NavBody() {
   );
 }
 
+/****  USE DESKTOP NAV  ***** */
 function useDesktopNav() {
   const [desktop, setDesktop] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
@@ -116,6 +123,7 @@ function useDesktopNav() {
   return desktop;
 }
 
+/**** SIDE BAR ***** */
 export function Sidebar() {
   const { navOpen, setNavOpen } = useShell();
   const desktop = useDesktopNav();

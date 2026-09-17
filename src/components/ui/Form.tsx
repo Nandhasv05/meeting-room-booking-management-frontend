@@ -1,6 +1,12 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION :  Create New
+ * */
 import { useEffect, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+/** Iser layout  *******/
 function useLayerLock(open: boolean, onClose: () => void) {
   useEffect(() => {
     if (!open) return;
@@ -17,6 +23,7 @@ function useLayerLock(open: boolean, onClose: () => void) {
   }, [open, onClose]);
 }
 
+/** Iser layout  *******/
 export function Modal({
   open,
   title,
@@ -66,6 +73,7 @@ export function Modal({
   );
 }
 
+/** Iser layout  *******/
 export function Offcanvas({
   open,
   title,
@@ -119,6 +127,7 @@ export function Offcanvas({
   );
 }
 
+/** Iser layout  *******/
 export function Field({
   label,
   hint,
@@ -137,9 +146,11 @@ export function Field({
   );
 }
 
+/** INPUT layout  *******/
 export const inputClass =
   'w-full rounded-xl border border-navy-800/12 bg-white/90 px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-navy-800/35 focus:border-brand-400 focus:ring-4 focus:ring-brand-400/12 disabled:bg-mist/60 disabled:text-navy-800/50';
 
+/** primary button  *******/
 export function PrimaryButton({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
@@ -153,6 +164,7 @@ export function PrimaryButton({ children, ...props }: ButtonHTMLAttributes<HTMLB
   );
 }
 
+/** ghost button *******/
 export function GhostButton({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
@@ -166,6 +178,7 @@ export function GhostButton({ children, ...props }: ButtonHTMLAttributes<HTMLBut
   );
 }
 
+/** Danger button  *******/
 export function DangerButton({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button

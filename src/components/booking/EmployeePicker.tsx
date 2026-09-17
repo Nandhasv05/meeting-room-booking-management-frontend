@@ -1,3 +1,8 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE THE USER VALIDATION
+ */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, UserPlus, X } from 'lucide-react';
@@ -8,6 +13,7 @@ import { selectSearchLoading, selectSearchResults } from '../../redux/users/user
 import { selectCurrentUser } from '../../redux/login/login.selector';
 import { listContacts, type SavedContact } from '../../helpers/contact/contactStore';
 
+/********** EMPLOYEE *********** */
 export type Employee = {
   Id: string;
   FirstName: string;
@@ -18,13 +24,16 @@ export type Employee = {
   Designation: string | null;
 };
 
+/********** PICKED EMPLOYEE *********** */
 export type PickedEmployee = { id: string; name: string; email: string };
 
+/********** INITALS OF  *********** */
 export function initialsOf(name: string) {
   const parts = name.trim().split(/\s+/);
   return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || 'U';
 }
 
+/********** EMPLOYEE PICKER DROPDOWN VALUES FUNCTIONS  *********** */
 export function EmployeePicker({
   selected,
   onAdd,

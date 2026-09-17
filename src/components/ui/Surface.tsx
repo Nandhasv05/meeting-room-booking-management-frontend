@@ -1,6 +1,12 @@
+/**
+ * AUTHOR : NANDHAKUMAR
+ * DATE : 17/09/2026
+ * DESC: CREATE THIS FILE SURFACE 
+ **/
 import type { ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
+/** Handle Card function ***/
 export function Card({
   children,
   className = '',
@@ -21,6 +27,7 @@ export function Card({
   );
 }
 
+/** Handle Card Header Function ***/
 export function CardHeader({
   title,
   subtitle,
@@ -41,6 +48,7 @@ export function CardHeader({
   );
 }
 
+/** Handle Toolbar Function ***/
 export function Toolbar({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div
@@ -51,6 +59,7 @@ export function Toolbar({ children, className = '' }: { children: ReactNode; cla
   );
 }
 
+/** Handle Card Header Function ***/
 export function TabPills<T extends string>({
   tabs,
   value,
@@ -80,6 +89,7 @@ export function TabPills<T extends string>({
   );
 }
 
+/** Handle Search Field Function ***/
 export function SearchField({
   value,
   onChange,
@@ -104,6 +114,7 @@ export function SearchField({
   );
 }
 
+/** Handle Toolbar Function ***/
 export type Column<T> = {
   key: string;
   header: ReactNode;
@@ -112,6 +123,7 @@ export type Column<T> = {
   align?: 'left' | 'right' | 'center';
 };
 
+/** Handle Data Table ***/
 export function DataTable<T>({
   columns,
   rows,
@@ -164,6 +176,7 @@ export function DataTable<T>({
   );
 }
 
+/** Handle Lsit Card ***/
 export function ListCard({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <ul
@@ -174,6 +187,7 @@ export function ListCard({ children, className = '' }: { children: ReactNode; cl
   );
 }
 
+/** Handle Pagination Function ***/
 export function Pagination({
   page,
   pageSize,
@@ -244,6 +258,7 @@ export function Pagination({
   );
 }
 
+/** Handle Toolbar Function ***/
 export function DefinitionItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-xl bg-mist/40 px-3 py-2.5">

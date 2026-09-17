@@ -1,8 +1,14 @@
+/*
+ * AUTHOR : NANDHAKUMAR S V
+ * DATE : 16/09/2026
+ * DESCRIPTION : INITIALIZE STAGE CREATION THIS COMPONENT IS USED TO DISPLAY THE TIME AND DATE IN THE BOOKING COMPOSER
+ */
 import { Link } from 'react-router-dom';
 import { publicAsset } from '../../utils/baseUrl';
 
 const LOGO_SRC = publicAsset('assets/logo.png');
 
+/********** BRAND LOGO PROPS *********** */
 type BrandLogoProps = {
   variant?: 'dark' | 'light';
   className?: string;

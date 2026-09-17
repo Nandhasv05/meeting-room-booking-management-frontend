@@ -1,8 +1,8 @@
-// AUTHOR : NANDHAKUMAR SV 
-// DATE : 28/08/2026
-// DESCRIPTION : Settings page to view and manage settings
-// DATE : 27/08/2026
-// DESCRIPTION : Settings page to view and manage settings
+/**
+ * AUTHOR: NANDHAKUMAR S V
+ * DATE: 09/09/2026
+ * DESCRIPTION: Settings page to view and manage settings
+ */
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -33,7 +33,7 @@ export function SettingsPage() {
 
   /******* STATE *******/
   const dispatch = useAppDispatch();
-  const [testTo, setTestTo] = useState('nandhakumarsv@gmail.com');
+  const [testTo, setTestTo] = useState('meeting@evolvclothing.com');
 
   /******* SELECTORS *******/
   const data = useAppSelector(selectSettings) as { Key: string; Value: string; Description: string }[] | undefined;
